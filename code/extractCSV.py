@@ -66,9 +66,7 @@ def count_sightings_perArea_perYear(file_path):
 def count_unique_entries(text_file):
     with open(text_file, mode='r', encoding='utf-8') as file:
         lines = file.readlines()
-        # Remove any surrounding whitespace, including newlines
         entries = [line.strip() for line in lines]
-        # Count the occurrences of each unique entry
         unique_counts = {}
         for entry in entries:
             if entry in unique_counts:
@@ -78,7 +76,6 @@ def count_unique_entries(text_file):
 
         return unique_counts
 
-# Example usage:
 file_path = 'data/NPS_ERMN_StreamsideBirdProtocol_2011_2022_Data_Certified.csv'
 column_name = 'Common_Name'
 # entries = extract_column_entries(file_path)

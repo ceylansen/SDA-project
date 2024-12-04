@@ -9,7 +9,6 @@ def extract_entries_from_excel(file_path, sheet_name=None):
     :return: pd.DataFrame - The extracted data.
     """
     try:
-        # Read the Excel file
         if sheet_name:
             data = pd.read_excel(file_path, sheet_name=sheet_name)
         else:
@@ -20,7 +19,6 @@ def extract_entries_from_excel(file_path, sheet_name=None):
         print(f"An error occurred: {e}")
         return None
 
-# Example usage
 file_path = "data/NCRN LAND Bird Monitoring Data 2007 - 2017_Public.xlsx"  # Replace with your file path
 sheet_name = 'ANTI'       # Replace with your sheet name or leave as None for the first sheet
 data = extract_entries_from_excel(file_path, sheet_name)

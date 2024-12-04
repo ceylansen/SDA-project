@@ -29,5 +29,4 @@ rows = cursor.fetchall()
 for row in rows:
     print(row[0], row[1], row[2])
 
-# Close the connection
 conn.close()
