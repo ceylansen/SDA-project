@@ -37,7 +37,16 @@ def sightings_per_year(file_path, column_name, county):
         csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
 
         for row in csv_reader:
-            if row['COUNTY'] == county:
+            if county == 'All':
+                observation_date = row['OBSERVATION DATE']
+                year = observation_date.split('-')[0]
+
+                if year in entries:
+                    entries[year] += 1
+                else:
+                    entries[year] = 1
+
+            elif row['COUNTY'] == county:
                 observation_date = row['OBSERVATION DATE']
                 year = observation_date.split('-')[0]
 
@@ -52,7 +61,7 @@ def sightings_per_year(file_path, column_name, county):
 file_path = 'data/birddataWV.txt'
 column_name = 'COMMON NAME'
 state = 'WV'
-county = 'Berkeley'
+county = 'All'
 if len(sys.argv) > 1:
     county = sys.argv[1]
 
