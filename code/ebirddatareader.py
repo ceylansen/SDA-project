@@ -2,11 +2,6 @@ import csv
 import os
 import sys
 
-
-import csv
-
-import csv
-
 def process_csv(file_path, column_name, county):
     entries = []
 
