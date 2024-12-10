@@ -1,6 +1,7 @@
 import sqlite3
 import matplotlib.pyplot as plt
 import datetime as dt
+import ebirddatareader
 
 # code voor de bounding box van de hele land bird monitoring data set 2007-2017
 # cursor.execute(

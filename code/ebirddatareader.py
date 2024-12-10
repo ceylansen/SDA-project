@@ -1,6 +1,7 @@
 import csv
 import os
 import sys
+import datetime as dt
 
 
 def process_csv(file_path, column_name, county):
@@ -23,8 +24,6 @@ def process_csv(file_path, column_name, county):
 
     return entries
 
-
-import csv
 
 def sightings_per_year(file_path, column_name, county):
     entries = {}
@@ -54,7 +53,29 @@ def sightings_per_year(file_path, column_name, county):
         for year, count in entries.items():
             txt_file.write(f"{year}: {count}\n")
 
-file_path = 'data/birddataWV.txt'
+
+def sightings_per_date(file_path):
+    entries = {}
+    with open(file_path, mode='r', encoding='utf-8') as csv_file:
+        csv_reader = csv.DictReader(csv_file, delimiter='\t')
+        csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
+
+        for row in csv_reader:
+            observation_date = row['OBSERVATION DATE']
+            year, month, day = observation_date.split('-')
+            date = dt.date(int(year), int(month), int(day))
+            if year in entries:
+                entries[date] += 1
+            else:
+                entries[date] = 1
+    # with open(f'{county}_sightings_per_year.txt', mode='w', encoding='utf-8') as txt_file:
+    #     for year, count in entries.items():
+    #         txt_file.write(f"{year}: {count}\n")
+    sorted_dates = dict(sorted(entries.items()))
+    print(sorted_dates)
+    return sorted_dates
+
+file_path = 'data/ebd_US-CA_200805_200809_relOct-2024.txt'
 column_name = 'COMMON NAME'
 state = 'WV'
 county = 'All'
@@ -62,4 +83,5 @@ if len(sys.argv) > 1:
     county = sys.argv[1]
 
 # process_csv(file_path, column_name, county)
-sightings_per_year(file_path, column_name, county)
+# sightings_per_year(file_path, column_name, county)
+sightings_per_date(file_path)
