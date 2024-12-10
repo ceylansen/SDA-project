@@ -79,9 +79,8 @@ def plot_fires_sightings(fires, sightings):
 
     plt.figure(figsize=(10, 6))
     plt.plot(dates_fires, fire_counts, label='Acres Burnt')
-    plt.plot(dates_sightings, sightings_count, label='bird counts')
 
-    plt.title('Amount of acres burnt in CA vs Bird sightings (2006-2015)', fontsize=14)
+    plt.title('Amount of acres burnt in CA (2006-2015)', fontsize=14)
     plt.xlabel('Date', fontsize=12)
     plt.ylabel('Acres Burnt', fontsize=12)
 
@@ -89,7 +88,21 @@ def plot_fires_sightings(fires, sightings):
     plt.legend(fontsize=10)
 
     plt.tight_layout()
-    plt.savefig('sightingsVSfires.png')
+    plt.savefig('fires.png')
+
+    plt.figure(figsize=(10, 6))
+
+    plt.plot(dates_sightings, sightings_count, label='bird counts')
+
+    plt.title('Bird sightings (2006-2015)', fontsize=14)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Count', fontsize=12)
+
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=10)
+
+    plt.tight_layout()
+    plt.savefig('sightings.png')
 
 
 db_path = 'data/firedata.sqlite'
