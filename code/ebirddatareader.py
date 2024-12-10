@@ -64,7 +64,7 @@ def sightings_per_date(file_path):
             observation_date = row['OBSERVATION DATE']
             year, month, day = observation_date.split('-')
             date = dt.date(int(year), int(month), int(day))
-            if year in entries:
+            if date in entries:
                 entries[date] += 1
             else:
                 entries[date] = 1
@@ -72,7 +72,6 @@ def sightings_per_date(file_path):
     #     for year, count in entries.items():
     #         txt_file.write(f"{year}: {count}\n")
     sorted_dates = dict(sorted(entries.items()))
-    print(sorted_dates)
     return sorted_dates
 
 file_path = 'data/ebd_US-CA_200805_200809_relOct-2024.txt'

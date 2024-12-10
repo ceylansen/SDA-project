@@ -71,9 +71,32 @@ def plot_fires(fires):
     plt.savefig('fires.png')
 
 
+def plot_fires_sightings(fires, sightings):
+    dates_fires = list(fires.keys())
+    fire_counts = list(fires.values())
+    dates_sightings = list(sightings.keys())
+    sightings_count = list(sightings.values())
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(dates_fires, fire_counts, label='Acres Burnt')
+    plt.plot(dates_sightings, sightings_count, label='bird counts')
+
+    plt.title('Amount of acres burnt in CA vs Bird sightings (2006-2015)', fontsize=14)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Acres Burnt', fontsize=12)
+
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=10)
+
+    plt.tight_layout()
+    plt.savefig('sightingsVSfires.png')
+
+
 db_path = 'data/firedata.sqlite'
 fires = extract_fires(db_path)
 max_fires = max(zip(fires.values(), fires.keys()))
+file_path_sightings = 'data/ebd_US-CA_200805_200809_relOct-2024.txt'
 print("Date with the largest fire:", max_fires)
 
 plot_fires(fires)
+plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
