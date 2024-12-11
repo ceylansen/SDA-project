@@ -31,6 +31,7 @@ def extract_fires(state, year1, year2):
     sorted_fires = dict(sorted(fires.items()))
     return sorted_fires
 
+
 def shannon_index_sightings(file_path):
     species_counts = Counter()
 
