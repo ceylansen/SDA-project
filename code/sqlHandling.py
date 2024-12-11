@@ -1,7 +1,9 @@
 import sqlite3
 import matplotlib.pyplot as plt
 import datetime as dt
+
 import ebirddatareader
+import shannon_calculation
 
 # code voor de bounding box van de hele land bird monitoring data set 2007-2017
 # cursor.execute(
@@ -105,11 +107,47 @@ def plot_fires_sightings(fires, sightings):
     plt.savefig('sightings.png')
 
 
+def plot_shannon_fires(fires, shannon_values):
+    dates_fires = list(fires.keys())
+    fire_counts = list(fires.values())
+    dates_shannon = list(shannon_values.keys())
+    values_shannon = list(shannon_values.values())
+
+    # plt.figure(figsize=(10, 6))
+    fig, ax1 = plt.subplots()
+    ax1.plot(dates_fires, fire_counts, label='Acres Burnt')
+
+    ax1.set_xlabel('Date', fontsize=12)
+    ax1.set_ylabel('Acres Burnt', fontsize=12)
+
+    ax2 = ax1.twinx()
+    ax2.plot(dates_shannon, values_shannon, 'r-', label="Shannon Index")
+    ax2.set_ylabel("Shannon Value", color='r')
+    ax2.tick_params(axis='y', labelcolor='r')
+
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=10)
+
+    plt.title('Amount of acres burnt in CA against shannon index (2006-2015)', fontsize=14)
+    fig.tight_layout()
+    plt.savefig('shannon_values.png')
+    plt.show()
+
+
 db_path = 'data/firedata.sqlite'
 fires = extract_fires(db_path)
 max_fires = max(zip(fires.values(), fires.keys()))
-file_path_sightings = 'data/ebd_US-CA_200805_200809_relOct-2024.txt'
+file_path_sightings = 'data/ebd_2006_2015.txt'
 print("Date with the largest fire:", max_fires)
 
-plot_fires(fires)
-plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
+# plot_fires(fires)
+# plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
+shannon_values = {}
+years = list(range(2006, 2016))
+months = list(range(1, 13))
+for year in years:
+    for month in months:
+        shannon_values[dt.date(year, month, 15)] = shannon_calculation.shannon_index_by_month('data/ebd_2006_2015.txt', month, year)
+
+print(shannon_values)
+plot_shannon_fires(fires, shannon_values)
