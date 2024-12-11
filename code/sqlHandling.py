@@ -119,6 +119,7 @@ def plot_shannon_fires(fires, shannon_values):
 
     ax1.set_xlabel('Date', fontsize=12)
     ax1.set_ylabel('Acres Burnt', fontsize=12)
+    ax1.set_yscale('log')
 
     ax2 = ax1.twinx()
     ax2.plot(dates_shannon, values_shannon, 'r-', label="Shannon Index")
@@ -142,12 +143,7 @@ print("Date with the largest fire:", max_fires)
 
 # plot_fires(fires)
 # plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
-shannon_values = {}
-years = list(range(2006, 2016))
-months = list(range(1, 13))
-for year in years:
-    for month in months:
-        shannon_values[dt.date(year, month, 15)] = shannon_calculation.shannon_index_by_month('data/ebd_2006_2015.txt', month, year)
-
-print(shannon_values)
-plot_shannon_fires(fires, shannon_values)
+shannon_values = shannon_calculation.shannon_index_by_month_CA()
+decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
+# print(shannon_values)
+plot_shannon_fires(fires, decomposed_values)
