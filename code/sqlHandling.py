@@ -70,18 +70,28 @@ def linear_regression_fires(fires, shannon_values, days=False):
     plt.show()
 
 
-def extract_fires(db_path):
+def extract_fires(db_path, county, county_code):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT DISCOVERY_DATE, FIRE_SIZE
-        FROM Fires
-        WHERE STATE = 'CA'
-        AND FIRE_YEAR BETWEEN 2006 AND 2015;
-        """
-    )
+    if county == "All":
+        cursor.execute(
+            """
+            SELECT DISCOVERY_DATE, FIRE_SIZE
+            FROM Fires
+            WHERE STATE = 'CA'
+            AND FIRE_YEAR BETWEEN 2006 AND 2015;
+            """
+        )
+    else:
+        cursor.execute(
+            f"""
+            SELECT DISCOVERY_DATE, FIRE_SIZE
+            FROM Fires
+            WHERE STATE = 'CA'
+            AND (COUNTY = {county_code} OR COUNTY LIKE '%{county}%')
+            AND FIRE_YEAR BETWEEN 2006 AND 2015;
+            """
+        )
     rows = cursor.fetchall()
     conn.close()
 
@@ -184,8 +194,10 @@ def plot_shannon_fires(fires, shannon_values):
     plt.show()
 
 
+county = "All"
+county_code = None
 db_path = 'data/firedata.sqlite'
-fires = extract_fires(db_path)
+fires = extract_fires(db_path, county, county_code)
 max_fires = max(zip(fires.values(), fires.keys()))
 file_path_sightings = 'data/ebd_2006_2015.txt'
 print("Date with the largest fire:", max_fires)
@@ -200,3 +212,4 @@ monthly_fires = fit_fires_to_months(fires)
 # print(shannon_values)
 linear_regression_fires(monthly_fires, decomposed_values, False)
 plot_shannon_fires(monthly_fires, decomposed_values)
+# plot_shannon_fires(fires, decomposed_values)

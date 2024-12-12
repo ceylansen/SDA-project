@@ -83,4 +83,4 @@ if len(sys.argv) > 1:
 
 # process_csv(file_path, column_name, county)
 # sightings_per_year(file_path, column_name, county)
-sightings_per_date(file_path)
+# sightings_per_date(file_path)
