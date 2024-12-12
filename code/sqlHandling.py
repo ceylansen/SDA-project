@@ -1,6 +1,11 @@
 import sqlite3
 import matplotlib.pyplot as plt
 import datetime as dt
+from collections import defaultdict
+from scipy.ndimage import gaussian_filter1d
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+import numpy as np
 
 import ebirddatareader
 import shannon_calculation
@@ -16,10 +21,53 @@ import shannon_calculation
 #     """
 #     )
 
+def fit_fires_to_months(fires):
+    monthly_fires = defaultdict(int)
+    for date, amount in fires.items():
+        # month = date.strftime('%Y-%m')  # Format as 'YYYY-MM'
+        index = dt.date(date.year, date.month, 15)
+        monthly_fires[index] += amount
+    monthly_fires = dict(monthly_fires)
+    return monthly_fires
+
+
 def get_real_date(julian_day):
     julian_base = 1721424.5  # Julian Day 0 blijkbaar
     gregorian_ordinal = int(julian_day - julian_base)
     return dt.date.fromordinal(gregorian_ordinal)
+
+
+def linear_regression_fires(fires, shannon_values, days=False):
+    if days:
+        print("check")
+        for date in shannon_values:
+            if fires.get(date, False) == False:
+                fires[date] = 0
+
+    dates_fires = list(fires.keys())
+    dates_shannon = list(shannon_values.keys())
+    X = np.array(list(fires.values())).reshape(-1, 1)
+    y = np.array(list(shannon_values.values()))
+    # Create and fit the model
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Get coefficients
+    slope = model.coef_[0]
+    intercept = model.intercept_
+
+    # Predict Shannon index based on wildfire data
+    y_pred = model.predict(X)
+
+    # Evaluate the model
+    r2 = r2_score(y, y_pred)
+    print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
+    plt.scatter(dates_shannon, shannon_values.values(), color='blue', label='Data')
+    plt.plot(dates_shannon, y_pred, color='red', label='Regression Line')
+    plt.xlabel('Wildfires (Acres Burnt)')
+    plt.ylabel('Shannon Index')
+    plt.legend()
+    plt.show()
 
 
 def extract_fires(db_path):
@@ -110,6 +158,7 @@ def plot_fires_sightings(fires, sightings):
 def plot_shannon_fires(fires, shannon_values):
     dates_fires = list(fires.keys())
     fire_counts = list(fires.values())
+    # smoothed_data = gaussian_filter1d(fire_counts, sigma=5)
     dates_shannon = list(shannon_values.keys())
     values_shannon = list(shannon_values.values())
 
@@ -144,6 +193,10 @@ print("Date with the largest fire:", max_fires)
 # plot_fires(fires)
 # plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
 shannon_values = shannon_calculation.shannon_index_by_month_CA()
+# shannon_values = shannon_calculation.shannon_concatenate_days()
 decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
+
+monthly_fires = fit_fires_to_months(fires)
 # print(shannon_values)
-plot_shannon_fires(fires, decomposed_values)
+linear_regression_fires(monthly_fires, decomposed_values, False)
+plot_shannon_fires(monthly_fires, decomposed_values)
