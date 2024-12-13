@@ -5,6 +5,7 @@ from collections import defaultdict
 from scipy.ndimage import gaussian_filter1d
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn.preprocessing import StandardScaler
 import statsmodels.api as sm
 import numpy as np
 
@@ -49,28 +50,31 @@ def linear_regression_fires(fires, shannon_values, days=False):
     dates_shannon = list(shannon_values.keys())
     X = np.array(list(fires.values())).reshape(-1, 1)
     y = np.array(list(shannon_values.values()))
+    # scaler = StandardScaler()
+    # x_normalized = scaler.fit_transform(X.reshape(-1, 1))
+    x_normalized = (X - X.min()) / (X.max() - X.min())
     # Create and fit the model
     model = LinearRegression()
-    model.fit(X, y)
+    model.fit(x_normalized, y)
 
     # Get coefficients
     slope = model.coef_[0]
     intercept = model.intercept_
 
     # Predict Shannon index based on wildfire data
-    y_pred = model.predict(X)
+    y_pred = model.predict(x_normalized)
 
     # Evaluate the model
     r2 = r2_score(y, y_pred)
 
-    X_with_const = sm.add_constant(X)  # Add intercept to the model
+    X_with_const = sm.add_constant(x_normalized)  # Add intercept to the model
     sm_model = sm.OLS(y, X_with_const).fit()
     p_value = sm_model.pvalues[1]  # p-value for the slope coefficient
     print("p-value slope: ", p_value)
 
     print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
-    plt.scatter(fires.values(), shannon_values.values(), color='blue', label='Data')
-    plt.plot(fires.values(), y_pred, color='red', label='Regression Line')
+    plt.scatter(x_normalized, shannon_values.values(), color='blue', label='Data')
+    plt.plot(x_normalized, y_pred, color='red', label='Regression Line')
     plt.xlabel('Wildfires (Acres Burnt)')
     # plt.xscale('log')
     plt.ylabel('Shannon Index')

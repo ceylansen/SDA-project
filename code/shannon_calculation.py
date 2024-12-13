@@ -195,6 +195,7 @@ def calc_shannon(species_counts):
     return shannon_index
 
 
+# Calc shannon index by day, requires file to be sorted by date
 def shannon_index_by_day(file_path):
     with open(file_path, mode='r', encoding='utf-8') as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter='\t')
@@ -294,6 +295,7 @@ def shannon_concatenate_days():
         shannon_values = shannon_index_by_day(f'sorted{year}.txt')
         all_shannon_values.update(shannon_values)
     return all_shannon_values
+
 
 def plot_shannon(shannon_values):
     dates_shannon = list(shannon_values.keys())
