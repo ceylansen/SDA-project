@@ -10,9 +10,27 @@ import datetime as dt
 import sys
 from statsmodels.tsa.stattools import kpss
 from statsmodels.tsa.stattools import adfuller
-
-
 import os
+
+
+def filter_for_county(input_file, output_dir='filtered'):
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(input_file, mode='r', encoding='utf-8') as csv_file:
+        print("reading in file...")
+        csv_reader = csv.DictReader(csv_file, delimiter='\t')
+        csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
+
+        year_file_path = os.path.join(output_dir, f"filtered_for_counties.txt")
+
+        print("writing to file")
+        with open(year_file_path, 'w') as year_file:
+            # Write the header to the output file
+            year_file.write(f"OBSERVATION DATE\t'COMMON NAME'\t'COUNTY'\t'COUNTY CODE'\n")
+            for row in csv_reader:
+                year_file.write(f"{row['OBSERVATION DATE']}\t{row['COMMON NAME']}\t{row['COUNTY']}\t{row['COUNTY CODE']}\n")
+
 
 def split_by_year_species(input_file, output_dir, target_year, date_column='OBSERVATION DATE', common_name_column='COMMON NAME'):
     # Ensure the output directory exists
@@ -331,3 +349,4 @@ file_path = 'data/ebd_2006_2015.txt'
 # output_path = 'data/sorted_20062015.txt'
 # shannon_values = shannon_concatenate_days()
 # plot_shannon(shannon_values)
+filter_for_county(file_path)
