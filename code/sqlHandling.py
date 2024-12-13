@@ -5,6 +5,7 @@ from collections import defaultdict
 from scipy.ndimage import gaussian_filter1d
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+import statsmodels.api as sm
 import numpy as np
 
 import ebirddatareader
@@ -61,10 +62,17 @@ def linear_regression_fires(fires, shannon_values, days=False):
 
     # Evaluate the model
     r2 = r2_score(y, y_pred)
+
+    X_with_const = sm.add_constant(X)  # Add intercept to the model
+    sm_model = sm.OLS(y, X_with_const).fit()
+    p_value = sm_model.pvalues[1]  # p-value for the slope coefficient
+    print("p-value slope: ", p_value)
+
     print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
-    plt.scatter(dates_shannon, shannon_values.values(), color='blue', label='Data')
-    plt.plot(dates_shannon, y_pred, color='red', label='Regression Line')
+    plt.scatter(fires.values(), shannon_values.values(), color='blue', label='Data')
+    plt.plot(fires.values(), y_pred, color='red', label='Regression Line')
     plt.xlabel('Wildfires (Acres Burnt)')
+    # plt.xscale('log')
     plt.ylabel('Shannon Index')
     plt.legend()
     plt.show()

@@ -99,25 +99,25 @@ def shannon_fourier_decomposed(shannon_values):
     high_frequency_reconstructed = np.fft.ifft(high_frequency_component).real
 
     # Plot original and components
-    # plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(12, 10))
 
-    # plt.subplot(3, 1, 1)
-    # plt.plot(values, label="Original Data", color='black')
-    # plt.title("Original Data")
-    # plt.legend()
+    plt.subplot(3, 1, 1)
+    plt.plot(values, label="Original Data", color='black')
+    plt.title("Original Data")
+    plt.legend()
 
-    # plt.subplot(3, 1, 2)
-    # plt.plot(low_frequency_reconstructed, label="Low-Frequency Component (Trend)", color='blue')
-    # plt.title("Low-Frequency Component (Trend)")
-    # plt.legend()
+    plt.subplot(3, 1, 2)
+    plt.plot(low_frequency_reconstructed, label="Low-Frequency Component (Trend)", color='blue')
+    plt.title("Low-Frequency Component (Trend)")
+    plt.legend()
 
-    # plt.subplot(3, 1, 3)
-    # plt.plot(high_frequency_reconstructed, label="High-Frequency Component (Fluctuations)", color='red')
-    # plt.title("High-Frequency Component (Fluctuations)")
-    # plt.legend()
+    plt.subplot(3, 1, 3)
+    plt.plot(high_frequency_reconstructed, label="High-Frequency Component (Fluctuations)", color='red')
+    plt.title("High-Frequency Component (Fluctuations)")
+    plt.legend()
 
-    # plt.tight_layout()
-    # plt.show()
+    plt.tight_layout()
+    plt.show()
 
     result_high = adfuller(high_frequency_reconstructed)
     print("High-Frequency Component ADF Test:")
