@@ -57,14 +57,12 @@ def linear_regression_fires(fires, shannon_values, days=False):
     model = LinearRegression()
     model.fit(x_normalized, y)
 
-    # Get coefficients
     slope = model.coef_[0]
     intercept = model.intercept_
 
     # Predict Shannon index based on wildfire data
     y_pred = model.predict(x_normalized)
 
-    # Evaluate the model
     r2 = r2_score(y, y_pred)
 
     X_with_const = sm.add_constant(x_normalized)  # Add intercept to the model
@@ -216,12 +214,12 @@ print("Date with the largest fire:", max_fires)
 
 # plot_fires(fires)
 # plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
-shannon_values = shannon_calculation.shannon_index_by_month_CA()
+# shannon_values = shannon_calculation.shannon_index_by_month_CA()
 # shannon_values = shannon_calculation.shannon_concatenate_days()
-decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
+# decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
 
-monthly_fires = fit_fires_to_months(fires)
+# monthly_fires = fit_fires_to_months(fires)
 # print(shannon_values)
-linear_regression_fires(monthly_fires, decomposed_values, False)
-plot_shannon_fires(monthly_fires, decomposed_values)
+# linear_regression_fires(monthly_fires, decomposed_values, False)
+# plot_shannon_fires(monthly_fires, decomposed_values)
 # plot_shannon_fires(fires, decomposed_values)
