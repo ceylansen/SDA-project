@@ -6,127 +6,128 @@ import json
 from collections import Counter
 import math
 import shannon_calculation
+from time import sleep
 
 countytocode = {
-    "Alameda": "1",
-    "Alpine": "3",
-    "Amador": "5",
-    "Butte": "7",
-    "Calaveras": "9",
-    "Colusa": "11",
-    "Contra Costa": "13",
-    "Del Norte": "15",
-    "El Dorado": "17",
-    "Fresno": "19",
-    "Glenn": "21",
-    "Humboldt": "23",
-    "Imperial": "25",
-    "Inyo": "27",
-    "Kern": "29",
-    "Kings": "31",
-    "Lake": "33",
-    "Lassen": "35",
-    "Los Angeles": "37",
-    "Madera": "39",
-    "Marin": "41",
-    "Mariposa": "43",
-    "Mendocino": "45",
-    "Merced": "47",
-    "Modoc": "49",
-    "Mono": "51",
-    "Monterey": "53",
-    "Napa": "55",
-    "Nevada": "57",
-    "Orange": "59",
-    "Placer": "61",
-    "Plumas": "63",
-    "Riverside": "65",
-    "Sacramento": "67",
-    "San Benito": "69",
-    "San Bernardino": "71",
-    "San Diego": "73",
-    "San Francisco": "75",
-    "San Joaquin": "77",
-    "San Luis Obispo": "79",
-    "San Mateo": "81",
-    "Santa Barbara": "83",
-    "Santa Clara": "85",
-    "Santa Cruz": "87",
-    "Shasta": "89",
-    "Sierra": "91",
-    "Siskiyou": "93",
-    "Solano": "95",
-    "Sonoma": "97",
-    "Stanislaus": "99",
-    "Sutter": "101",
-    "Tehama": "103",
-    "Trinity": "105",
-    "Tulare": "107",
-    "Tuolumne": "109",
-    "Ventura": "111",
-    "Yolo": "113",
-    "Yuba": "115"
+    "alameda": "1",
+    "alpine": "3",
+    "amador": "5",
+    "butte": "7",
+    "calaveras": "9",
+    "colusa": "11",
+    "contra costa": "13",
+    "del norte": "15",
+    "el Dorado": "17",
+    "fresno": "19",
+    "glenn": "21",
+    "humboldt": "23",
+    "imperial": "25",
+    "inyo": "27",
+    "kern": "29",
+    "kings": "31",
+    "lake": "33",
+    "lassen": "35",
+    "los Angeles": "37",
+    "madera": "39",
+    "marin": "41",
+    "mariposa": "43",
+    "mendocino": "45",
+    "merced": "47",
+    "mdoc": "49",
+    "mono": "51",
+    "monterey": "53",
+    "napa": "55",
+    "nevada": "57",
+    "orange": "59",
+    "placer": "61",
+    "plumas": "63",
+    "riverside": "65",
+    "sacramento": "67",
+    "san benito": "69",
+    "san bernardino": "71",
+    "san diego": "73",
+    "san francisco": "75",
+    "san joaquin": "77",
+    "san luis Obispo": "79",
+    "san mateo": "81",
+    "santa barbara": "83",
+    "santa clara": "85",
+    "santa cruz": "87",
+    "shasta": "89",
+    "sierra": "91",
+    "siskiyou": "93",
+    "solano": "95",
+    "sonoma": "97",
+    "stanislaus": "99",
+    "sutter": "101",
+    "tehama": "103",
+    "trinity": "105",
+    "tulare": "107",
+    "tuolumne": "109",
+    "ventura": "111",
+    "yolo": "113",
+    "yuba": "115"
 }
 
 codetocounty = {
-    "1": "Alameda",
-    "3": "Alpine",
-    "5": "Amador",
-    "7": "Butte",
-    "9": "Calaveras",
-    "11": "Colusa",
-    "13": "Contra Costa",
-    "15": "Del Norte",
-    "17": "El Dorado",
-    "19": "Fresno",
-    "21": "Glenn",
-    "23": "Humboldt",
-    "25": "Imperial",
-    "27": "Inyo",
-    "29": "Kern",
-    "31": "Kings",
-    "33": "Lake",
-    "35": "Lassen",
-    "37": "Los Angeles",
-    "39": "Madera",
-    "41": "Marin",
-    "43": "Mariposa",
-    "45": "Mendocino",
-    "47": "Merced",
-    "49": "Modoc",
-    "51": "Mono",
-    "53": "Monterey",
-    "55": "Napa",
-    "57": "Nevada",
-    "59": "Orange",
-    "61": "Placer",
-    "63": "Plumas",
-    "65": "Riverside",
-    "67": "Sacramento",
-    "69": "San Benito",
-    "71": "San Bernardino",
-    "73": "San Diego",
-    "75": "San Francisco",
-    "77": "San Joaquin",
-    "79": "San Luis Obispo",
-    "81": "San Mateo",
-    "83": "Santa Barbara",
-    "85": "Santa Clara",
-    "87": "Santa Cruz",
-    "89": "Shasta",
-    "91": "Sierra",
-    "93": "Siskiyou",
-    "95": "Solano",
-    "97": "Sonoma",
-    "99": "Stanislaus",
-    "101": "Sutter",
-    "103": "Tehama",
-    "105": "Trinity",
-    "107": "Tulare",
-    "109": "Tuolumne",
-    "111": "Ventura",
-    "113": "Yolo",
-    "115": "Yuba"
+    "1": "alameda",
+    "3": "alpine",
+    "5": "amador",
+    "7": "butte",
+    "9": "calaveras",
+    "11": "colusa",
+    "13": "contra costa",
+    "15": "del norte",
+    "17": "el dorado",
+    "19": "fresno",
+    "21": "glenn",
+    "23": "humboldt",
+    "25": "imperial",
+    "27": "inyo",
+    "29": "kern",
+    "31": "kings",
+    "33": "lake",
+    "35": "lassen",
+    "37": "los angeles",
+    "39": "madera",
+    "41": "marin",
+    "43": "mariposa",
+    "45": "mendocino",
+    "47": "merced",
+    "49": "modoc",
+    "51": "mono",
+    "53": "monterey",
+    "55": "napa",
+    "57": "nevada",
+    "59": "orange",
+    "61": "placer",
+    "63": "plumas",
+    "65": "riverside",
+    "67": "sacramento",
+    "69": "san benito",
+    "71": "san bernardino",
+    "73": "san diego",
+    "75": "san francisco",
+    "77": "san joaquin",
+    "79": "san luis obispo",
+    "81": "san mateo",
+    "83": "santa barbara",
+    "85": "santa clara",
+    "87": "santa cruz",
+    "89": "shasta",
+    "91": "sierra",
+    "93": "siskiyou",
+    "95": "solano",
+    "97": "sonoma",
+    "99": "stanislaus",
+    "101": "sutter",
+    "103": "tehama",
+    "105": "trinity",
+    "107": "tulare",
+    "109": "tuolumne",
+    "111": "ventura",
+    "113": "yolo",
+    "115": "yuba"
 }
 
 
@@ -158,26 +159,6 @@ def shannon_index_by_month_filtered(filtered_bird_data, month, year):
         shannon_index -= p_i * math.log(p_i)
     return shannon_index
 
-
-def combine_fire_data(fire_data, county_name, county_code):
-    combined_data = {}
-
-    if county_name in fire_data:
-        combined_data[county_name] = fire_data[county_name]
-
-    if county_code in fire_data:
-        if county_name not in combined_data:
-            combined_data[county_name] = fire_data[county_code]
-        else:
-            for date, size in fire_data[county_code].items():
-                if date in combined_data[county_name]:
-                    combined_data[county_name][date] += size
-                else:
-                    combined_data[county_name][date] = size
-
-    return combined_data
-
-
 def get_real_date(julian_day):
     julian_base = 1721424.5  # Julian Day 0 blijkbaar
     gregorian_ordinal = int(julian_day - julian_base)
@@ -203,11 +184,13 @@ def extract_all_fires(db_path):
             gregorian_date = get_real_date(julian_date)
             if county:
                 county = county.strip().lower()
+                is_county_code = county.isdigit()
+                if is_county_code:
+                    county = codetocounty.get(county, "")
             else:
                 continue
             if county not in fires:
                 fires[county] = {}
-
             if gregorian_date not in fires[county]:
                 fires[county][gregorian_date] = fire_size
             else:
@@ -284,8 +267,7 @@ def plot_shannon_for_all_counties(fire_data, bird_data_path):
                             filtered_bird_data.append(line)
 
             if filtered_bird_data:
-                combined_data = combine_fire_data(fire_data, county_name, codetocounty.get(county_name, ""))
-                process_and_plot_for_county(county_name, combined_data, filtered_bird_data)
+                process_and_plot_for_county(county_name, fire_data, filtered_bird_data)
             else:
                 print(f"No bird data found for {county_name}.")
 
