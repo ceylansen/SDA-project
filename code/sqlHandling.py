@@ -25,7 +25,7 @@ import shannon_calculation
 
 def fit_fires_to_months(fires):
     monthly_fires = defaultdict(int)
-    for _, date, amount in fires.items():
+    for date, amount in fires.items():
         # month = date.strftime('%Y-%m')  # Format as 'YYYY-MM'
         index = dt.date(date.year, date.month, 15)
         monthly_fires[index] += amount
