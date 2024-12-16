@@ -1,6 +1,7 @@
 import sqlite3
 import matplotlib.pyplot as plt
 import datetime as dt
+import csv
 import random
 import json
 from collections import Counter
@@ -149,8 +150,6 @@ def get_largest_fires(fires, county):
     dates, sizes = zip(*largest_fires)
     return dates, sizes
 
-
-# Get the shannon index by month for a given list of bird data
 def shannon_index_by_month_filtered(filtered_bird_data, month, year):
     species_counts = Counter()
 
@@ -173,7 +172,66 @@ def shannon_index_by_month_filtered(filtered_bird_data, month, year):
     return shannon_index
 
 
-# Convert julian to gregorian day
+def sort_county_by_date(input_file, output_file, county):
+    with open(input_file, mode='r', encoding='utf-8') as file:
+        csv_reader = csv.DictReader(file, delimiter='\t')
+        csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
+
+        print(csv_reader.fieldnames)
+        if "'COUNTY'" not in csv_reader.fieldnames:
+            raise ValueError(f"Column must be present in the file.")
+
+        print("appending...")
+        entries = []
+        for row in csv_reader:
+            if row["'COUNTY'"] == county:
+                entries.append(row)
+
+        print("sorting...")
+        # Read and sort rows by the date column
+        sorted_rows = sorted(
+            entries,
+            key=lambda row: dt.datetime.strptime(row['OBSERVATION DATE'], '%Y-%m-%d')
+        )
+
+    return sorted_rows
+
+
+def shannon_index_by_day_for_array(data):
+    species_counts = Counter()
+    shannon_values = {}
+    current_date = None
+    for row in data:
+        date = row['OBSERVATION DATE'].strip()
+        y, m, d = date.split('-')
+        next_date = dt.date(int(y), int(m), int(d))
+
+        if current_date is None:
+            # First date in the file
+            current_date = next_date
+
+        if next_date > current_date:
+            # Calculate Shannon index for the previous day
+            shannon_index = shannon_calculation.calc_shannon(species_counts)
+            shannon_values[current_date] = shannon_index
+
+            # Transition to the next day
+            current_date = next_date
+            species_counts.clear()
+
+        # Add species for the current row
+        common_name = row["'COMMON NAME'"].strip()
+        species_counts[common_name] += 1
+
+    # Handle the final day's data
+    if species_counts:
+        shannon_index = shannon_calculation.calc_shannon(species_counts)
+        shannon_values[current_date] = shannon_index
+
+    # print(shannon_values)
+    return shannon_values
+
+
 def get_real_date(julian_day):
     julian_base = 1721424.5  # Julian Day 0 blijkbaar
     gregorian_ordinal = int(julian_day - julian_base)
@@ -249,6 +307,7 @@ def plot_full_shannon_county(county_name, decomposed_values):
     plt.close()
 
 
+
 def process_and_plot_for_county(county_name, fire_data, filtered_bird_data):
     fires = fire_data.get(county_name, {})
     if not fires:
@@ -314,8 +373,6 @@ def plot_shannon_for_all_counties(fire_data, bird_data_path):
             print(f"Failed to process {county_name}: {e}")
 
 
-# Plot the 5 largest fires and 1 random fire and the decomposed
-# shannon values for a certain period after that fire
 def plot_shannon_test(dates, shannon_values, fires, county_name):
     shannon_dates = list(shannon_values.keys())
     FIRE_MARGIN = 30
@@ -373,7 +430,13 @@ db_path = "data/firedata.sqlite"
 bird_path = "data/filtered_for_counties.txt"
 fires = extract_all_fires(db_path)
 
-plot_shannon_for_all_counties(fires, bird_path)
+# plot_shannon_for_all_counties(fires, bird_path)
+sorted_county = sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
+shannon_day_values = shannon_index_by_day_for_array(sorted_county)
+decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)
+shannon_calculation.plot_shannon(decomposed_values)
+# monthly_fires = sqlHandling.fit_fires_to_months(fires['humboldt'])
+# sqlHandling.linear_regression_fires(monthly_fires, decomposed_values)
 
 # dates, sizes = get_largest_fires(fires, county)
 # shannon_values = {}
