@@ -172,7 +172,8 @@ def extract_all_fires(db_path):
     query = """
     SELECT DISCOVERY_DATE, FIRE_SIZE, COUNTY
     FROM Fires
-    WHERE STATE = 'CA';
+    WHERE STATE = 'CA'
+    AND FIRE_YEAR BETWEEN 2006 AND 2015;
     """
     cursor.execute(query)
     rows = cursor.fetchall()
