@@ -91,6 +91,10 @@ def shannon_diff(shannon_values):
     pass
 
 
+def fourier_filter(frequency, shannon_values):
+    pass
+
+
 def shannon_fourier_decomposed(shannon_values):
     values = list(shannon_values.values())
     n = len(values)  # Number of samples
@@ -117,91 +121,48 @@ def shannon_fourier_decomposed(shannon_values):
     high_frequency_reconstructed = np.fft.ifft(high_frequency_component).real
 
     # Plot original and components
-    # plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(12, 10))
 
-    # plt.subplot(3, 1, 1)
-    # plt.plot(values, label="Original Data", color='black')
-    # plt.title("Original Data")
-    # plt.legend()
+    plt.subplot(3, 1, 1)
+    plt.plot(values, label="Original Data", color='black')
+    plt.title("Original Data")
+    plt.legend()
 
-    # plt.subplot(3, 1, 2)
-    # plt.plot(low_frequency_reconstructed, label="Low-Frequency Component (Trend)", color='blue')
-    # plt.title("Low-Frequency Component (Trend)")
-    # plt.legend()
+    plt.subplot(3, 1, 2)
+    plt.plot(low_frequency_reconstructed, label="Low-Frequency Component (Trend)", color='blue')
+    plt.title("Low-Frequency Component (Trend)")
+    plt.legend()
 
-    # plt.subplot(3, 1, 3)
-    # plt.plot(high_frequency_reconstructed, label="High-Frequency Component (Fluctuations)", color='red')
-    # plt.title("High-Frequency Component (Fluctuations)")
-    # plt.legend()
+    plt.subplot(3, 1, 3)
+    plt.plot(high_frequency_reconstructed, label="High-Frequency Component (Fluctuations)", color='red')
+    plt.title("High-Frequency Component (Fluctuations)")
+    plt.legend()
 
-    # plt.tight_layout()
-    # plt.show()
+    plt.tight_layout()
+    plt.show()
 
-    # result_high = adfuller(high_frequency_reconstructed)
-    # print("High-Frequency Component ADF Test:")
-    # print(f"ADF Statistic: {result_high[0]}")
-    # print(f"P-Value: {result_high[1]}")
-    # result_low = adfuller(low_frequency_reconstructed)
-    # print("\nLow-Frequency Component ADF Test:")
-    # print(f"ADF Statistic: {result_low[0]}")
-    # print(f"P-Value: {result_low[1]}")
+    result_high = adfuller(high_frequency_reconstructed)
+    print("High-Frequency Component ADF Test:")
+    print(f"ADF Statistic: {result_high[0]}")
+    print(f"P-Value: {result_high[1]}")
+    result_low = adfuller(low_frequency_reconstructed)
+    print("\nLow-Frequency Component ADF Test:")
+    print(f"ADF Statistic: {result_low[0]}")
+    print(f"P-Value: {result_low[1]}")
 
-    # result_high_kpss = kpss(high_frequency_reconstructed)
-    # print("High-Frequency Component KPSS Test:")
-    # print(f"KPSS Statistic: {result_high_kpss[0]}")
-    # print(f"P-Value: {result_high_kpss[1]}")
-    # result_low_kpss = kpss(low_frequency_reconstructed)
-    # print("\nLow-Frequency Component KPSS Test:")
-    # print(f"KPSS Statistic: {result_low_kpss[0]}")
-    # print(f"P-Value: {result_low_kpss[1]}")
+    result_high_kpss = kpss(high_frequency_reconstructed)
+    print("High-Frequency Component KPSS Test:")
+    print(f"KPSS Statistic: {result_high_kpss[0]}")
+    print(f"P-Value: {result_high_kpss[1]}")
+    result_low_kpss = kpss(low_frequency_reconstructed)
+    print("\nLow-Frequency Component KPSS Test:")
+    print(f"KPSS Statistic: {result_low_kpss[0]}")
+    print(f"P-Value: {result_low_kpss[1]}")
 
 
     keys = list(shannon_values.keys())
     decomposed_values = {key: value for key, value in zip(keys, high_frequency_reconstructed)}
     return decomposed_values
-
-
-def shannon_fourier(shannon_values):
-    # sorted_data = dict(sorted(shannon_values.items(), key=lambda x: dt.strptime(x[0], '%Y-%m-%d')))
-    # values = list(sorted_data.values())
-    values = list(shannon_values.values())
-    # values = values - np.mean(values)
-    # n = len(values)
-    # fft_values = fft(values)
-    # frequencies = fftfreq(len(values), 1)
-    # positive_frequencies = frequencies[:n // 2]
-    # positive_magnitudes = np.abs(fft_values[:n // 2])
-    # print(fft_values)
-    # print(frequencies)
-    n = len(values)  # Number of samples
-
-    # Perform Fourier Transform
-    fft_values = np.fft.fft(values)
-    frequencies = np.fft.fftfreq(n)
-
-    # Remove DC Component (mean)
-    fft_values[0] = 0
-
-    # Optional: Remove Low-Frequency Components (apply high-pass filter)
-    cutoff_frequency = 0.1  # Adjust this based on your data
-    fft_values[np.abs(frequencies) < cutoff_frequency] = 0
-
-    # Perform Inverse Fourier Transform to get stationary data
-    stationary_line = np.fft.ifft(fft_values).real
-    plt.figure(figsize=(10,8))
-    # plt.plot(positive_frequencies, positive_magnitudes, marker='o', label="Frequency Spectrum")
-    # plt.title("Frequency Spectrum")
-    # plt.xlabel("Frequency")
-    # plt.ylabel("Magnitude")
-    # plt.legend()
-    # plt.title('FFT Analysis')
-    # plt.show()
-    plt.title("Stationary Line (Trend Removed)")
-    plt.plot(stationary_line, marker='o', label="Stationary Line")
-    plt.xlabel("Index")
-    plt.ylabel("Amplitude")
-    plt.show()
-    return fft_values
 
 
 def calc_shannon(species_counts):
