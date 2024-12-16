@@ -25,7 +25,7 @@ import shannon_calculation
 
 def fit_fires_to_months(fires):
     monthly_fires = defaultdict(int)
-    for date, amount in fires.items():
+    for _, date, amount in fires.items():
         # month = date.strftime('%Y-%m')  # Format as 'YYYY-MM'
         index = dt.date(date.year, date.month, 15)
         monthly_fires[index] += amount
@@ -37,6 +37,54 @@ def get_real_date(julian_day):
     julian_base = 1721424.5  # Julian Day 0 blijkbaar
     gregorian_ordinal = int(julian_day - julian_base)
     return dt.date.fromordinal(gregorian_ordinal)
+
+
+def linear_regression_fires_counties(fires, shannon_values, county_name="All", days=False):
+    print(county_name)
+    aggregated_fires = defaultdict(int)
+    if county_name == "All":
+        for county_data in fires.values():
+            for date, fire_size in county_data.items():
+                aggregated_fires[date] += fire_size
+    else:
+        county_data = fires.get(county_name.lower(), {})
+        for date, fire_size in county_data.items():
+            aggregated_fires[date] += fire_size
+
+    if days:
+        for date in shannon_values:
+            if aggregated_fires.get(date, False) == False:
+                aggregated_fires[date] = 0
+
+    dates_fires = list(aggregated_fires.keys())
+    dates_shannon = list(shannon_values.keys())
+    X = np.array([aggregated_fires[date] for date in dates_shannon]).reshape(-1, 1)
+    y = np.array([shannon_values[date] for date in dates_shannon])
+
+    x_normalized = (X - X.min()) / (X.max() - X.min())
+
+    model = LinearRegression()
+    model.fit(x_normalized, y)
+
+    slope = model.coef_[0]
+    intercept = model.intercept_
+
+    y_pred = model.predict(x_normalized)
+
+    r2 = r2_score(y, y_pred)
+    X_with_const = sm.add_constant(x_normalized)
+    sm_model = sm.OLS(y, X_with_const).fit()
+    p_value = sm_model.pvalues[1]
+
+    print("p-value slope: ", p_value)
+    print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
+    plt.scatter(x_normalized, y, color='blue', label='Data')
+    plt.plot(x_normalized, y_pred, color='red', label='Regression Line')
+    plt.xlabel('Wildfires (Acres Burnt)')
+    plt.ylabel('Shannon Index')
+    plt.legend()
+    plt.savefig(f"regression_{county_name}.png")
+    plt.close()
 
 
 def linear_regression_fires(fires, shannon_values, county_name="All", days=False):
@@ -78,7 +126,7 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     plt.ylabel('Shannon Index')
     plt.legend()
     plt.show()
-    plt.savefig(f"regression{county_name}.png")
+    plt.close()
 
 def extract_fires(db_path, county, county_code):
     conn = sqlite3.connect(db_path)
@@ -204,13 +252,13 @@ def plot_shannon_fires(fires, shannon_values):
     plt.show()
 
 
-county = "All"
-county_code = None
-db_path = 'data/firedata.sqlite'
-fires = extract_fires(db_path, county, county_code)
-max_fires = max(zip(fires.values(), fires.keys()))
-file_path_sightings = 'data/ebd_2006_2015.txt'
-print("Date with the largest fire:", max_fires)
+# county = "All"
+# county_code = None
+# db_path = 'data/firedata.sqlite'
+# fires = extract_fires(db_path, county, county_code)
+# max_fires = max(zip(fires.values(), fires.keys()))
+# file_path_sightings = 'data/ebd_2006_2015.txt'
+# print("Date with the largest fire:", max_fires)
 
 # plot_fires(fires)
 # plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
