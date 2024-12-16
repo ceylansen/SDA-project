@@ -80,6 +80,7 @@ def linear_regression_fires_counties(fires, shannon_values, county_name="All", d
     print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
     plt.scatter(x_normalized, y, color='blue', label='Data')
     plt.plot(x_normalized, y_pred, color='red', label='Regression Line')
+    plt.title(f'Linear regression {county_name} (2006-2015)', fontsize=14)
     plt.xlabel('Wildfires (Acres Burnt)')
     plt.ylabel('Shannon Index')
     plt.ylim(-3, 3)
