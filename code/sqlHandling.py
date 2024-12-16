@@ -39,7 +39,7 @@ def get_real_date(julian_day):
     return dt.date.fromordinal(gregorian_ordinal)
 
 
-def linear_regression_fires(fires, shannon_values, days=False):
+def linear_regression_fires(fires, shannon_values, county_name="All", days=False):
     if days:
         print("check")
         for date in shannon_values:
@@ -78,7 +78,7 @@ def linear_regression_fires(fires, shannon_values, days=False):
     plt.ylabel('Shannon Index')
     plt.legend()
     plt.show()
-
+    plt.savefig(f"regression{county_name}.png")
 
 def extract_fires(db_path, county, county_code):
     conn = sqlite3.connect(db_path)
