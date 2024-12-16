@@ -23,6 +23,7 @@ import shannon_calculation
 #     """
 #     )
 
+# fit fires dataset which is based on days, to the total acres burnt in that month
 def fit_fires_to_months(fires):
     monthly_fires = defaultdict(int)
     for date, amount in fires.items():
@@ -33,6 +34,7 @@ def fit_fires_to_months(fires):
     return monthly_fires
 
 
+# convert Julian_day to gregorian
 def get_real_date(julian_day):
     julian_base = 1721424.5  # Julian Day 0 blijkbaar
     gregorian_ordinal = int(julian_day - julian_base)
@@ -125,6 +127,7 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     plt.plot(x_normalized, y_pred, color='red', label='Regression Line')
     plt.title(f'Linear regression {county_name} (2006-2015)', fontsize=14)
     plt.xlabel('Wildfires (Acres Burnt)')
+    plt.xlim(0, 0.001)  # Focus on the dense cluster
     # plt.xscale('log')
     plt.ylabel('Shannon Index')
     plt.legend()
@@ -270,7 +273,7 @@ def plot_shannon_fires(fires, shannon_values):
 # decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
 
 # monthly_fires = fit_fires_to_months(fires)
-# print(shannon_values)
+# # print(shannon_values)
 # linear_regression_fires(monthly_fires, decomposed_values, False)
 # plot_shannon_fires(monthly_fires, decomposed_values)
 # plot_shannon_fires(fires, decomposed_values)

@@ -82,18 +82,15 @@ def cross_correlate(shannon_values, fires):
     plt.title('Cross-Correlation Between Acres Burnt and Shannon Index')
     plt.show()
 
-
-db_path = "data/firedata.sqlite"
-bird_path = "data/filtered_for_counties.txt"
-fires = shannon_fires.extract_all_fires(db_path)
-sorted_county = shannon_fires.sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
-shannon_day_values = shannon_fires.shannon_index_by_day_for_array(sorted_county)
-smoothed_data = gaussian_filter1d(list(shannon_day_values.values()), sigma=2)
-smoothed_data_with_keys = dict(zip(shannon_day_values.keys(), smoothed_data))
-month_avgs = fit_shannon_to_months_avg(smoothed_data_with_keys)
-decomposed_values = shannon_calculation.shannon_fourier_decomposed(month_avgs)
-monthly_fires = fit_fires_to_months(fires['lake'])
-cross_correlate(month_avgs, monthly_fires)
-# print("keys")
-# print(fit_shannon_to_months(decomposed_values).keys())
-# print(sqlHandling.fit_fires_to_months(fires['humboldt']).keys())
+def test_cross_correlate():
+    db_path = "data/firedata.sqlite"
+    bird_path = "data/filtered_for_counties.txt"
+    fires = shannon_fires.extract_all_fires(db_path)
+    sorted_county = shannon_fires.sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
+    shannon_day_values = shannon_fires.shannon_index_by_day_for_array(sorted_county)
+    smoothed_data = gaussian_filter1d(list(shannon_day_values.values()), sigma=2)
+    smoothed_data_with_keys = dict(zip(shannon_day_values.keys(), smoothed_data))
+    month_avgs = fit_shannon_to_months_avg(smoothed_data_with_keys)
+    decomposed_values = shannon_calculation.shannon_fourier_decomposed(month_avgs)
+    monthly_fires = fit_fires_to_months(fires['humboldt'])
+    cross_correlate(month_avgs, monthly_fires)
