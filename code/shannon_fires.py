@@ -6,8 +6,8 @@ import json
 from collections import Counter
 import math
 import shannon_calculation
-from sqlHandling import fit_fires_to_months
-from sqlHandling import linear_regression_fires
+from collections import defaultdict
+from sqlHandling import linear_regression_fires_counties
 
 countytocode = {
     "alameda": "1",
@@ -134,6 +134,16 @@ codetocounty = {
 
 DAYSPOSTFIRE = 365
 
+def fit_fires_to_months_counties(fires):
+    monthly_fires = defaultdict(lambda: defaultdict(int))
+    for county, fire_data in fires.items():
+        for date, amount in fire_data.items():
+            index = dt.date(date.year, date.month, 15)
+            monthly_fires[county][index] += amount
+    monthly_fires = {county: dict(data) for county, data in monthly_fires.items()}
+    return monthly_fires
+
+
 def get_largest_fires(fires, county):
     largest_fires = sorted(fires.items(), key=lambda x: x[1], reverse=True)[:5]
     dates, sizes = zip(*largest_fires)
@@ -209,23 +219,16 @@ def extract_all_fires(db_path):
         county: dict(sorted(dates.items()))
         for county, dates in fires.items()
     }
-
-    with open("california_fires.json", "w") as file:
-        json.dump(
-            {
-                county: {date.isoformat(): size for date, size in dates.items()}
-                for county, dates in sorted_fires.items()
-            },
-            file,
-        )
-
     return sorted_fires
+
+
 
 
 # Plot the linear regression for the given county
 def lin_reg_counties(county_name, fire_data, decomposed_values):
-    monthly_fire = fit_fires_to_months(fire_data)
-    linear_regression_fires(monthly_fire, decomposed_values, county_name)
+    monthly_fire = fit_fires_to_months_counties(fire_data)
+    linear_regression_fires_counties(monthly_fire, decomposed_values, county_name)
+    print(county_name)
 
 # Plot the decomposed shannon values of a county from 2006-2025
 def plot_full_shannon_county(county_name, decomposed_values):
@@ -242,7 +245,8 @@ def plot_full_shannon_county(county_name, decomposed_values):
     plt.legend(fontsize=10)
 
     plt.tight_layout()
-    plt.savefig(f"regression{county_name}.png")
+    plt.savefig(f"Shannon_values_{county_name}.png")
+    plt.close()
 
 
 def process_and_plot_for_county(county_name, fire_data, filtered_bird_data):
@@ -262,7 +266,7 @@ def process_and_plot_for_county(county_name, fire_data, filtered_bird_data):
                 filtered_bird_data, month, year
             )
     decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
-    plot_shannon_test(dates, decomposed_values, fires, county_name)
+    # plot_shannon_test(dates, decomposed_values, fires, county_name)
     lin_reg_counties(county_name, fire_data, decomposed_values)
     plot_full_shannon_county(county_name, decomposed_values)
 
