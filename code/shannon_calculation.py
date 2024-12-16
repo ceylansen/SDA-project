@@ -219,41 +219,33 @@ def shannon_index_by_day(file_path):
         csv_reader = csv.DictReader(csv_file, delimiter='\t')
         csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
 
-        # sorted_csv = sort_by_date(csv_reader)
         species_counts = Counter()
         shannon_values = {}
-        current_date = None  # Initialize as None
+        current_date = None
 
         print("beginning shannon calc per day...")
         for row in csv_reader:
-            # print("new row...")
             date = row["OBSERVATION DATE"].strip()
-            # print(date)
-            # print(f'row_date: {date}')
             y, m, d = date.split('-')
             next_date = dt.date(int(y), int(m), int(d))
             # print(f'next_date: {next_date}')
 
             if current_date is None:
-                # print("current_date is None...")
                 # First date in the file
                 current_date = next_date
 
             if next_date > current_date:
                 # Calculate Shannon index for the previous day
-                # print(f'new date found: current={current_date}, next={next_date}')
-                # print(species_counts)
                 shannon_index = calc_shannon(species_counts)
                 shannon_values[current_date] = shannon_index
 
                 # Transition to the next day
                 current_date = next_date
-                species_counts.clear()  # Clear for the new day
+                species_counts.clear()
 
             # Add species for the current row
             common_name = row["COMMON NAME"].strip()
             species_counts[common_name] += 1
-            # print(f'adding {common_name} to {current_date}')
 
         # Handle the final day's data
         if species_counts:
