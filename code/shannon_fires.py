@@ -431,10 +431,10 @@ bird_path = "data/filtered_for_counties.txt"
 fires = extract_all_fires(db_path)
 
 # plot_shannon_for_all_counties(fires, bird_path)
-sorted_county = sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
-shannon_day_values = shannon_index_by_day_for_array(sorted_county)
-decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)
-shannon_calculation.plot_shannon(decomposed_values)
+# sorted_county = sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
+# shannon_day_values = shannon_index_by_day_for_array(sorted_county)
+# decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)
+# shannon_calculation.plot_shannon(decomposed_values)
 # monthly_fires = sqlHandling.fit_fires_to_months(fires['humboldt'])
 # sqlHandling.linear_regression_fires(monthly_fires, decomposed_values)
 
