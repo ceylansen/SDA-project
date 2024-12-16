@@ -2,55 +2,98 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter1d
+from collections import defaultdict
 from scipy.signal import correlate
 import shannon_fires, shannon_calculation, sqlHandling
+from scipy.signal import detrend
 
-def fit_shannon_to_months(shannon_values):
+def fit_shannon_to_months_avg(shannon_values):
     monthly_totals = {}  # To store the sum of values for each month
     monthly_counts = {}  # To store the count of values for each month
 
+    # Aggregate values into months
     for date, value in shannon_values.items():
-        month = (date.year, date.month)
-        if month in monthly_totals.keys():
+        month = dt.date(date.year, date.month, 15)  # Use the 15th as the representative date
+        if month in monthly_totals:
             monthly_totals[month] += value
             monthly_counts[month] += 1
         else:
-            monthly_totals[month] = 1
+            monthly_totals[month] = value
             monthly_counts[month] = 1
+
+    # Ensure all months from 2006 to 2016 are represented
+    for year in range(2006, 2016):
+        for month in range(1, 13):
+            date = dt.date(year, month, 15)
+            if date not in monthly_totals:
+                monthly_totals[date] = 0
+                monthly_counts[date] = 0
 
     # Calculate the average for each month
     monthly_averages = {
-        month: monthly_totals[month] / monthly_counts[month]
+        month: (monthly_totals[month] / monthly_counts[month]) if monthly_counts[month] > 0 else 0
         for month in monthly_totals
     }
     return monthly_averages
 
 
-def cross_correlate(max_lag, shannon_values, fires):
-    sorted_county = shannon_fires.sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
-    shannon_day_values = shannon_fires.shannon_index_by_day_for_array(sorted_county)
-    decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)
-    # shannon_calculation.plot_shannon(decomposed_values)
-    # Assuming 'acres_burnt' and 'shannon_fluctuations' are your time series
-    lag = np.arange(-max_lag, max_lag + 1)
-    cross_corr = correlate(shannon_values, fires.values(), mode='full', method='fft')
-    lags = lag[np.argmax(cross_corr)]  # Find lag with highest correlation
+def fit_fires_to_months(fires):
+    monthly_fires = defaultdict(int)
+    for date, amount in fires.items():
+        # month = date.strftime('%Y-%m')  # Format as 'YYYY-MM'
+        index = dt.date(date.year, date.month, 15)
+        monthly_fires[index] += amount
+    monthly_fires = dict(monthly_fires)
 
+    for year in range(2006, 2016):
+        for month in range(1, 13):
+            date = dt.date(year, month, 15)
+            if date not in monthly_fires:
+                monthly_fires[date] = 0
+
+    return monthly_fires
+
+
+def cross_correlate(shannon_values, fires):
+    shannon_array = np.array(list(shannon_values.values()))
+    fires_array = np.array(list(fires.values()))
+
+    shannon_array = detrend(shannon_array)
+    fires_array = detrend(fires_array)
+
+    shannon_array = (shannon_array - np.mean(shannon_array)) / np.std(shannon_array)
+    fires_array = (fires_array - np.mean(fires_array)) / np.std(fires_array)
+
+    # lag = np.arange(-max_lag, max_lag + 1)
+    lag = np.arange(-len(shannon_array) + 1, len(fires_array))
+    cross_corr = correlate(shannon_array, fires_array, mode='full', method='fft')
+
+    max_lag_index = np.argmax(np.abs(cross_corr))  # Index of max absolute value
+    best_lag = lag[max_lag_index]  # Corresponding lag
+    best_correlation = cross_corr[max_lag_index]
+    print("best lag: ", best_lag)
+    print("corresponding correlation value: ", best_correlation)
+
+    # print(lags)
     plt.plot(lag, cross_corr)
-    plt.xlabel('Lag (days)')
+    plt.xlabel('Lag (months)')
     plt.ylabel('Cross-Correlation')
     plt.title('Cross-Correlation Between Acres Burnt and Shannon Index')
     plt.show()
+
 
 db_path = "data/firedata.sqlite"
 bird_path = "data/filtered_for_counties.txt"
 fires = shannon_fires.extract_all_fires(db_path)
 sorted_county = shannon_fires.sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
 shannon_day_values = shannon_fires.shannon_index_by_day_for_array(sorted_county)
-decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)
-print("shannon")
-print(len(decomposed_values))
-print(len(fit_shannon_to_months(decomposed_values)))
-print("fires")
-print(len(fires['humboldt']))
-print(sqlHandling.fit_fires_to_months(fires['humboldt']))
+smoothed_data = gaussian_filter1d(list(shannon_day_values.values()), sigma=2)
+smoothed_data_with_keys = dict(zip(shannon_day_values.keys(), smoothed_data))
+month_avgs = fit_shannon_to_months_avg(smoothed_data_with_keys)
+decomposed_values = shannon_calculation.shannon_fourier_decomposed(month_avgs)
+monthly_fires = fit_fires_to_months(fires['lake'])
+cross_correlate(month_avgs, monthly_fires)
+# print("keys")
+# print(fit_shannon_to_months(decomposed_values).keys())
+# print(sqlHandling.fit_fires_to_months(fires['humboldt']).keys())
