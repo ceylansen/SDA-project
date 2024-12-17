@@ -134,7 +134,7 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     plt.show()
     plt.close()
 
-def extract_fires(db_path, county, county_code):
+def extract_fires(db_path, county, county_code=None):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     if county == "All":
@@ -249,31 +249,24 @@ def plot_shannon_fires(fires, shannon_values):
     ax2.set_ylabel("Shannon Value", color='r')
     ax2.tick_params(axis='y', labelcolor='r')
 
-    plt.grid(True, linestyle='--', alpha=0.6)
-    plt.legend(fontsize=10)
+    lines_1, labels_1 = ax1.get_legend_handles_labels()
+    lines_2, labels_2 = ax2.get_legend_handles_labels()
+    fig.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper left', fontsize=10,
+               bbox_to_anchor=(0.8, 0.9))
 
+    plt.grid(True, linestyle='--', alpha=0.6)
     plt.title('Amount of acres burnt in CA against shannon index (2006-2015)', fontsize=14)
     fig.tight_layout()
-    plt.savefig('shannon_values.png')
+    plt.savefig('shannon_values_fires.png')
     plt.show()
 
 
-# county = "All"
-# county_code = None
 # db_path = 'data/firedata.sqlite'
-# fires = extract_fires(db_path, county, county_code)
+# fires = extract_fires(db_path, 'All')
 # max_fires = max(zip(fires.values(), fires.keys()))
-# file_path_sightings = 'data/ebd_2006_2015.txt'
 # print("Date with the largest fire:", max_fires)
-
-# plot_fires(fires)
-# plot_fires_sightings(fires, ebirddatareader.sightings_per_date(file_path_sightings))
 # shannon_values = shannon_calculation.shannon_index_by_month_CA()
-# shannon_values = shannon_calculation.shannon_concatenate_days()
-# decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
-
+# shannon_calculation.shannon_fourier_decomposed(shannon_values)
 # monthly_fires = fit_fires_to_months(fires)
-# # print(shannon_values)
-# linear_regression_fires(monthly_fires, decomposed_values, False)
-# plot_shannon_fires(monthly_fires, decomposed_values)
+# plot_shannon_fires(monthly_fires, shannon_values)
 # plot_shannon_fires(fires, decomposed_values)

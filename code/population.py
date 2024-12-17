@@ -10,7 +10,7 @@ import os
 import math
 import shannon_fires
 import shannon_calculation
-import lag
+from lag import fit_fires_to_months, fit_shannon_to_months_avg
 import sqlHandling
 
 
@@ -34,8 +34,9 @@ def filter_for_county_effort(input_file, county, output_dir='filtered'):
                     effort_file.write(f"{row['OBSERVATION DATE']}\t{row['SAMPLING EVENT IDENTIFIER']}\n")
 
 
-def count_total_bird_population_by_state(state):
-    sorted_county = shannon_fires.sort_county_by_date('data/filtered_for_counties.txt', 'ebird_counties_datesorted.txt', 'Humboldt')
+def count_total_bird_population_by_county(county):
+    print(county)
+    sorted_county = shannon_fires.sort_county_by_date('data/filtered_for_counties.txt', 'ebird_counties_datesorted.txt', f'{county}')
     species_counts = Counter()
     shannon_values = {}
     current_date = None
@@ -72,7 +73,7 @@ def count_total_bird_population_by_state(state):
 
 def plot_population_fires_county(county):
     db_path = "data/firedata.sqlite"
-    total_observations = count_total_bird_population_by_state(f'{county}')
+    total_observations = count_total_bird_population_by_county(f'{county}')
     fires = shannon_fires.extract_all_fires(db_path)
 
     weights = adjust_for_userbase(county)
@@ -80,14 +81,15 @@ def plot_population_fires_county(county):
 
     smoothed_data = gaussian_filter1d(list(weighted_observations.values()), sigma=2)
     smoothed_data_with_keys = dict(zip(total_observations.keys(), smoothed_data))
-    county_fires = fires[f'{county}']
+    lowercase_county = county.lower()
+    county_fires = fires[f'{lowercase_county}']
 
-    avg_populations = lag.fit_shannon_to_months_avg(smoothed_data_with_keys)
+    avg_populations = fit_shannon_to_months_avg(smoothed_data_with_keys)
 
     # detrended_populations = detrend(list(avg_populations.values()))
     detrended_populations = shannon_calculation.shannon_fourier_decomposed(avg_populations)
 
-    monthly_fires = lag.fit_fires_to_months(county_fires)
+    monthly_fires = fit_fires_to_months(county_fires)
 
     fig, ax1 = plt.subplots()
     ax1.plot(list(monthly_fires.keys()), list(monthly_fires.values()), label='Acres Burnt')
@@ -137,5 +139,26 @@ def adjust_for_userbase(county):
     weights = {year: max_events / events for year, events in sampling_events.items()}
     return weights
 
-# filter_for_county_effort('data/ebd_2006_2015.txt', 'San Diego')
-plot_population_fires_county('san diego')
+# Plots bird count after being adjusted by effort weights
+def plot_adjusted_bird_count(county):
+    total_observations = count_total_bird_population_by_county(f'{county}')
+    weights = adjust_for_userbase(county)
+    weighted_observations = { date: count * weights.get(date.year, 1) for date, count in total_observations.items()}
+    smoothed_data = gaussian_filter1d(list(weighted_observations.values()), sigma=2)
+    smoothed_data_with_keys = dict(zip(total_observations.keys(), smoothed_data))
+    avg_populations = fit_shannon_to_months_avg(smoothed_data_with_keys)
+    plt.plot(list(avg_populations.keys()), list(avg_populations.values()), 'r-', label="observations")
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=10)
+    plt.title(f'average amount of observations each month in {county}')
+    plt.show()
+
+
+def linear_regression_test():
+    counties = ['Humboldt', 'Orange', 'Mendocino', 'San Diego', 'San Bernardino']
+    for county in counties:
+        plot_population_fires_county(f'{county}')
+
+# filter_for_county_effort('data/ebd_2006_2015.txt', 'San Bernardino')
+# plot_population_fires_county('Humboldt')
+# plot_adjusted_bird_count('Humboldt')

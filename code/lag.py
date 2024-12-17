@@ -6,6 +6,7 @@ from scipy.ndimage import gaussian_filter1d
 from collections import defaultdict
 from scipy.signal import correlate
 import shannon_fires, shannon_calculation, sqlHandling
+# from population import count_total_bird_population_by_county, adjust_for_userbase
 from scipy.signal import detrend
 
 def fit_shannon_to_months_avg(shannon_values):
@@ -59,8 +60,8 @@ def cross_correlate(shannon_values, fires):
     shannon_array = np.array(list(shannon_values.values()))
     fires_array = np.array(list(fires.values()))
 
-    shannon_array = detrend(shannon_array)
-    fires_array = detrend(fires_array)
+    # shannon_array = detrend(shannon_array)
+    # fires_array = detrend(fires_array)
 
     shannon_array = (shannon_array - np.mean(shannon_array)) / np.std(shannon_array)
     fires_array = (fires_array - np.mean(fires_array)) / np.std(fires_array)
@@ -86,11 +87,15 @@ def test_cross_correlate():
     db_path = "data/firedata.sqlite"
     bird_path = "data/filtered_for_counties.txt"
     fires = shannon_fires.extract_all_fires(db_path)
-    sorted_county = shannon_fires.sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
-    shannon_day_values = shannon_fires.shannon_index_by_day_for_array(sorted_county)
-    smoothed_data = gaussian_filter1d(list(shannon_day_values.values()), sigma=2)
-    smoothed_data_with_keys = dict(zip(shannon_day_values.keys(), smoothed_data))
+    total_observations = count_total_bird_population_by_county('Orange')
+    weights = adjust_for_userbase('Orange')
+    weighted_observations = { date: count * weights.get(date.year, 1) for date, count in total_observations.items()}
+    smoothed_data = gaussian_filter1d(list(weighted_observations.values()), sigma=2)
+    smoothed_data_with_keys = dict(zip(weighted_observations.keys(), smoothed_data))
     month_avgs = fit_shannon_to_months_avg(smoothed_data_with_keys)
     decomposed_values = shannon_calculation.shannon_fourier_decomposed(month_avgs)
     monthly_fires = fit_fires_to_months(fires['humboldt'])
-    cross_correlate(month_avgs, monthly_fires)
+    cross_correlate(decomposed_values, monthly_fires)
+
+
+# test_cross_correlate()
