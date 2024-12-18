@@ -139,7 +139,6 @@ def adjust_for_userbase(county):
     weights = {year: max_events / events for year, events in sampling_events.items()}
     return weights
 
-
 # Plots bird count after being adjusted by effort weights
 def plot_adjusted_bird_count(county):
     total_observations = count_total_bird_population_by_county(f'{county}')

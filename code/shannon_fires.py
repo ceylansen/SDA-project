@@ -287,7 +287,6 @@ def lin_reg_counties(county_name, fire_data, decomposed_values):
     linear_regression_fires_counties(monthly_fire, decomposed_values, county_name)
     print(county_name)
 
-
 # Plot the decomposed shannon values of a county from 2006-2025
 def plot_full_shannon_county(county_name, decomposed_values):
     dates_shannon = list(decomposed_values.keys())
