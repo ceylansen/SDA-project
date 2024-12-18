@@ -13,7 +13,7 @@ from statsmodels.tsa.stattools import adfuller
 import os
 
 
-def filter_for_county(input_file, output_dir='filtered'):
+def filter_for_county(input_file, year = list, output_dir='filtered'):
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
@@ -29,7 +29,13 @@ def filter_for_county(input_file, output_dir='filtered'):
             # Write the header to the output file
             year_file.write(f"OBSERVATION DATE\t'COMMON NAME'\t'COUNTY'\t'COUNTY CODE'\n")
             for row in csv_reader:
-                year_file.write(f"{row['OBSERVATION DATE']}\t{row['COMMON NAME']}\t{row['COUNTY']}\t{row['COUNTY CODE']}\n")
+                if len(year) != 0:
+                    date = row['OBSERVATION DATE']
+                    year_entry = date.split('-')[0]
+                    if int(year_entry) in year:
+                        year_file.write(f"{row['OBSERVATION DATE']}\t{row['COMMON NAME']}\t{row['COUNTY']}\t{row['COUNTY CODE']}\n")
+                else:
+                    year_file.write(f"{row['OBSERVATION DATE']}\t{row['COMMON NAME']}\t{row['COUNTY']}\t{row['COUNTY CODE']}\n")
 
 
 def split_by_year_species(input_file, output_dir, target_year, date_column='OBSERVATION DATE', common_name_column='COMMON NAME'):
@@ -235,6 +241,7 @@ def shannon_index_sightings(file_path):
         shannon_index -= p_i * math.log(p_i)
     return shannon_index
 
+
 def shannon_index_by_month(file_path, month, year):
     species_counts = Counter()
 
@@ -249,6 +256,8 @@ def shannon_index_by_month(file_path, month, year):
                 common_name = row["COMMON NAME"].strip()
                 species_counts[common_name] += 1
             elif int(y) > year:
+                break
+            elif int(y) == year and int(m) > month:
                 break
 
     total_sightings = sum(species_counts.values())

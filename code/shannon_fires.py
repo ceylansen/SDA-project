@@ -150,13 +150,14 @@ def get_largest_fires(fires, county):
     dates, sizes = zip(*largest_fires)
     return dates, sizes
 
+
 def shannon_index_by_month_filtered(filtered_bird_data, month, year):
     species_counts = Counter()
 
     for row in filtered_bird_data:
-        columns = row.split('\t')  # Split the line into columns
-        date = columns[0]  # OBSERVATION DATE
-        common_name = columns[1].strip()  # COMMON NAME
+        columns = row.split('\t')
+        date = columns[0]
+        common_name = columns[1].strip()
 
         y, m, d = date.split('-')
         if year == int(y) and month == int(m):
@@ -280,13 +281,12 @@ def extract_all_fires(db_path):
     return sorted_fires
 
 
-
-
 # Plot the linear regression for the given county
 def lin_reg_counties(county_name, fire_data, decomposed_values):
     monthly_fire = fit_fires_to_months_counties(fire_data)
     linear_regression_fires_counties(monthly_fire, decomposed_values, county_name)
     print(county_name)
+
 
 # Plot the decomposed shannon values of a county from 2006-2025
 def plot_full_shannon_county(county_name, decomposed_values):

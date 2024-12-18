@@ -112,7 +112,7 @@ def plot_population_fires_county(county):
     plt.show()
 
     # Linear regression part
-    sqlHandling.linear_regression_fires(monthly_fires, detrended_populations, 'humboldt')
+    sqlHandling.linear_regression_fires(monthly_fires, detrended_populations, f'{county}')
 
 
 def count_sampling_events(file_path):
@@ -139,6 +139,7 @@ def adjust_for_userbase(county):
     weights = {year: max_events / events for year, events in sampling_events.items()}
     return weights
 
+
 # Plots bird count after being adjusted by effort weights
 def plot_adjusted_bird_count(county):
     total_observations = count_total_bird_population_by_county(f'{county}')
@@ -159,6 +160,7 @@ def linear_regression_test():
     for county in counties:
         plot_population_fires_county(f'{county}')
 
+
 # filter_for_county_effort('data/ebd_2006_2015.txt', 'San Bernardino')
-# plot_population_fires_county('Humboldt')
+# plot_population_fires_county('Orange')
 # plot_adjusted_bird_count('Humboldt')

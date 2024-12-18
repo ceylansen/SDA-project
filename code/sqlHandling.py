@@ -1,9 +1,11 @@
 import sqlite3
 import matplotlib.pyplot as plt
 import datetime as dt
+import pandas as pd
 from collections import defaultdict
 from scipy.ndimage import gaussian_filter1d
-from sklearn.linear_model import LinearRegression
+from scipy.stats import pearsonr
+from sklearn.linear_model import LinearRegression, HuberRegressor
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 import statsmodels.api as sm
@@ -66,6 +68,7 @@ def linear_regression_fires_counties(fires, shannon_values, county_name="All", d
     x_normalized = (X - X.min()) / (X.max() - X.min())
 
     model = LinearRegression()
+    # model = RANSACRegressor(base_estimator=LinearRegression(), random_state=42)
     model.fit(x_normalized, y)
 
     slope = model.coef_[0]
@@ -106,7 +109,8 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     # x_normalized = scaler.fit_transform(X.reshape(-1, 1))
     x_normalized = (X - X.min()) / (X.max() - X.min())
     # Create and fit the model
-    model = LinearRegression()
+    # model = LinearRegression()
+    model = HuberRegressor()
     model.fit(x_normalized, y)
 
     slope = model.coef_[0]
@@ -114,6 +118,13 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
 
     # Predict Shannon index based on wildfire data
     y_pred = model.predict(x_normalized)
+
+    x_new = np.array(list(fires.values()))
+    data = {'X': x_new, 'y': y}
+    df = pd.DataFrame(data)
+    r, p_value = pearsonr(df['X'], df['y'])
+    print(f"Pearson Correlation Coefficient: {r:.4f}")
+    print(f"P-value: {p_value:.4f}")
 
     r2 = r2_score(y, y_pred)
 
@@ -127,12 +138,77 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     plt.plot(x_normalized, y_pred, color='red', label='Regression Line')
     plt.title(f'Linear regression {county_name} (2006-2015)', fontsize=14)
     plt.xlabel('Wildfires (Acres Burnt)')
-    plt.xlim(0, 0.001)  # Focus on the dense cluster
+    # plt.xlim(0, 1)  # Focus on the dense cluster
     # plt.xscale('log')
     plt.ylabel('Shannon Index')
     plt.legend()
     plt.show()
     plt.close()
+
+
+def extract_fires_county_year(db_path, county, year):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(
+        f"""
+        SELECT DISCOVERY_DATE, FIRE_SIZE
+        FROM Fires
+        WHERE COUNTY == {county}
+        AND FIRE_YEAR == {year};
+        """
+    )
+    rows = cursor.fetchall()
+    conn.close()
+
+    fires = {}
+    for row in rows:
+        julian_date = row[0]
+        try:
+            gregorian_date = get_real_date(julian_date)
+            fire_size = row[1]
+
+            if gregorian_date not in fires:
+                fires[gregorian_date] = fire_size
+            else:
+                fires[gregorian_date] += fire_size
+        except ValueError as e:
+            print(f"Error converting Julian date {julian_date}: {e}")
+
+    sorted_fires = dict(sorted(fires.items()))
+    return sorted_fires
+
+
+def extract_fires_for_year(db_path, year):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(
+        f"""
+        SELECT DISCOVERY_DATE, FIRE_SIZE
+        FROM Fires
+        WHERE STATE == 'CA'
+        AND FIRE_YEAR == {year};
+        """
+    )
+    rows = cursor.fetchall()
+    conn.close()
+
+    fires = {}
+    for row in rows:
+        julian_date = row[0]
+        try:
+            gregorian_date = get_real_date(julian_date)
+            fire_size = row[1]
+
+            if gregorian_date not in fires:
+                fires[gregorian_date] = fire_size
+            else:
+                fires[gregorian_date] += fire_size
+        except ValueError as e:
+            print(f"Error converting Julian date {julian_date}: {e}")
+
+    sorted_fires = dict(sorted(fires.items()))
+    return sorted_fires
+
 
 def extract_fires(db_path, county, county_code=None):
     conn = sqlite3.connect(db_path)
@@ -229,7 +305,7 @@ def plot_fires_sightings(fires, sightings):
     plt.savefig('sightings.png')
 
 
-def plot_shannon_fires(fires, shannon_values):
+def plot_shannon_fires(fires, shannon_values, name=None):
     dates_fires = list(fires.keys())
     fire_counts = list(fires.values())
     # smoothed_data = gaussian_filter1d(fire_counts, sigma=5)
@@ -257,8 +333,10 @@ def plot_shannon_fires(fires, shannon_values):
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.title('Amount of acres burnt in CA against shannon index (2006-2015)', fontsize=14)
     fig.tight_layout()
-    plt.savefig('shannon_values_fires.png')
-    plt.show()
+    if name != None:
+        plt.savefig(f'{name}.png')
+    else:
+        plt.show()
 
 
 # db_path = 'data/firedata.sqlite'
