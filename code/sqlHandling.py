@@ -1,5 +1,6 @@
 import sqlite3
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import datetime as dt
 import pandas as pd
 from collections import defaultdict
@@ -146,7 +147,7 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     plt.close()
 
 
-def extract_fires_county_year(db_path, county, year):
+def extract_fires_county_year(db_path, county, year1, year2):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
@@ -154,7 +155,7 @@ def extract_fires_county_year(db_path, county, year):
         SELECT DISCOVERY_DATE, FIRE_SIZE
         FROM Fires
         WHERE COUNTY == {county}
-        AND FIRE_YEAR == {year};
+        AND FIRE_YEAR between {year1} AND {year2};
         """
     )
     rows = cursor.fetchall()
@@ -178,7 +179,7 @@ def extract_fires_county_year(db_path, county, year):
     return sorted_fires
 
 
-def extract_fires_for_year(db_path, year):
+def extract_fires_for_year(db_path, year1, year2):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
@@ -186,7 +187,7 @@ def extract_fires_for_year(db_path, year):
         SELECT DISCOVERY_DATE, FIRE_SIZE
         FROM Fires
         WHERE STATE == 'CA'
-        AND FIRE_YEAR == {year};
+        AND FIRE_YEAR BETWEEN {year1} AND {year2};
         """
     )
     rows = cursor.fetchall()
@@ -312,7 +313,7 @@ def plot_shannon_fires(fires, shannon_values, name=None):
     dates_shannon = list(shannon_values.keys())
     values_shannon = list(shannon_values.values())
 
-    # plt.figure(figsize=(10, 6))
+    # plt.figure(figsize=(12, 10))
     fig, ax1 = plt.subplots()
     ax1.plot(dates_fires, fire_counts, label='Acres Burnt')
 
@@ -330,6 +331,9 @@ def plot_shannon_fires(fires, shannon_values, name=None):
     fig.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper left', fontsize=10,
                bbox_to_anchor=(0.8, 0.9))
 
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    ax1.xaxis.set_major_locator(mdates.AutoDateLocator())
+    fig.autofmt_xdate()
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.title('Amount of acres burnt in CA against shannon index (2006-2015)', fontsize=14)
     fig.tight_layout()

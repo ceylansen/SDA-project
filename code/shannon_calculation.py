@@ -101,7 +101,7 @@ def fourier_filter(frequency, shannon_values):
     pass
 
 
-def shannon_fourier_decomposed(shannon_values):
+def shannon_fourier_decomposed(shannon_values, name=None):
     values = list(shannon_values.values())
     n = len(values)  # Number of samples
 
@@ -127,43 +127,45 @@ def shannon_fourier_decomposed(shannon_values):
     high_frequency_reconstructed = np.fft.ifft(high_frequency_component).real
 
     # Plot original and components
-    plt.figure(figsize=(12, 10))
+    if name != None:
+        plt.figure(figsize=(12, 10))
 
-    plt.subplot(3, 1, 1)
-    plt.plot(values, label="Original Data", color='black')
-    plt.title("Original Data")
-    plt.legend()
+        plt.subplot(3, 1, 1)
+        plt.plot(values, label="Original Data", color='black')
+        plt.title("Original Data")
+        plt.legend()
 
-    plt.subplot(3, 1, 2)
-    plt.plot(low_frequency_reconstructed, label="Low-Frequency Component (Trend)", color='blue')
-    plt.title("Low-Frequency Component (Trend)")
-    plt.legend()
+        plt.subplot(3, 1, 2)
+        plt.plot(low_frequency_reconstructed, label="Low-Frequency Component (Trend)", color='blue')
+        plt.title("Low-Frequency Component (Trend)")
+        plt.legend()
 
-    plt.subplot(3, 1, 3)
-    plt.plot(high_frequency_reconstructed, label="High-Frequency Component (Fluctuations)", color='red')
-    plt.title("High-Frequency Component (Fluctuations)")
-    plt.legend()
+        plt.subplot(3, 1, 3)
+        plt.plot(high_frequency_reconstructed, label="High-Frequency Component (Fluctuations)", color='red')
+        plt.title("High-Frequency Component (Fluctuations)")
+        plt.legend()
 
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.savefig(f'{name}.png')
+        # plt.show()
 
-    result_high = adfuller(high_frequency_reconstructed)
-    print("High-Frequency Component ADF Test:")
-    print(f"ADF Statistic: {result_high[0]}")
-    print(f"P-Value: {result_high[1]}")
-    result_low = adfuller(low_frequency_reconstructed)
-    print("\nLow-Frequency Component ADF Test:")
-    print(f"ADF Statistic: {result_low[0]}")
-    print(f"P-Value: {result_low[1]}")
+        result_high = adfuller(high_frequency_reconstructed)
+        print("High-Frequency Component ADF Test:")
+        print(f"ADF Statistic: {result_high[0]}")
+        print(f"P-Value: {result_high[1]}")
+        result_low = adfuller(low_frequency_reconstructed)
+        print("\nLow-Frequency Component ADF Test:")
+        print(f"ADF Statistic: {result_low[0]}")
+        print(f"P-Value: {result_low[1]}")
 
-    result_high_kpss = kpss(high_frequency_reconstructed)
-    print("High-Frequency Component KPSS Test:")
-    print(f"KPSS Statistic: {result_high_kpss[0]}")
-    print(f"P-Value: {result_high_kpss[1]}")
-    result_low_kpss = kpss(low_frequency_reconstructed)
-    print("\nLow-Frequency Component KPSS Test:")
-    print(f"KPSS Statistic: {result_low_kpss[0]}")
-    print(f"P-Value: {result_low_kpss[1]}")
+        result_high_kpss = kpss(high_frequency_reconstructed)
+        print("High-Frequency Component KPSS Test:")
+        print(f"KPSS Statistic: {result_high_kpss[0]}")
+        print(f"P-Value: {result_high_kpss[1]}")
+        result_low_kpss = kpss(low_frequency_reconstructed)
+        print("\nLow-Frequency Component KPSS Test:")
+        print(f"KPSS Statistic: {result_low_kpss[0]}")
+        print(f"P-Value: {result_low_kpss[1]}")
 
 
     keys = list(shannon_values.keys())
