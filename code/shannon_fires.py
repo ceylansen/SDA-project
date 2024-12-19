@@ -148,6 +148,8 @@ counties_standalone = ['Alameda', 'Alpine', 'Amador', 'Butte', 'Calaveras', 'Col
 
 DAYSPOSTFIRE = 365
 
+
+# Fits fires to monthly intervals for the county dictionary fire dataset
 def fit_fires_to_months_counties(fires):
     monthly_fires = defaultdict(lambda: defaultdict(int))
     for county, fire_data in fires.items():
@@ -158,12 +160,14 @@ def fit_fires_to_months_counties(fires):
     return monthly_fires
 
 
+# Gets five largest fires from given data
 def get_largest_fires(fires, county):
     largest_fires = sorted(fires.items(), key=lambda x: x[1], reverse=True)[:5]
     dates, sizes = zip(*largest_fires)
     return dates, sizes
 
 
+# Computes shannon index for specific month for filtered data set
 def shannon_index_by_month_filtered(filtered_bird_data, month, year):
     species_counts = Counter()
 
@@ -186,6 +190,7 @@ def shannon_index_by_month_filtered(filtered_bird_data, month, year):
     return shannon_index
 
 
+# Sorts sighting entries for a specific county by date
 def sort_county_by_date(input_file, county):
     with open(input_file, mode='r', encoding='utf-8') as file:
         csv_reader = csv.DictReader(file, delimiter='\t')
@@ -210,6 +215,7 @@ def sort_county_by_date(input_file, county):
     return sorted_rows
 
 
+# Computes shannon index for every date from data stored in array instead of file
 def shannon_index_by_day_for_array(data):
     species_counts = Counter()
     shannon_values = {}
@@ -239,6 +245,7 @@ def shannon_index_by_day_for_array(data):
     return shannon_values
 
 
+# Converts julian date to gregorian date
 def get_real_date(julian_day):
     julian_base = 1721424.5  # Julian Day 0 blijkbaar
     gregorian_ordinal = int(julian_day - julian_base)
@@ -293,7 +300,8 @@ def lin_reg_counties(county_name, fire_data, decomposed_values):
     linear_regression_fires_counties(monthly_fire, decomposed_values, county_name)
     print(county_name)
 
-# Plot the decomposed shannon values of a county from 2006-2025
+
+# Plot the decomposed shannon values of a county from 2006-2015
 def plot_full_shannon_county(county_name, decomposed_values):
     dates_shannon = list(decomposed_values.keys())
     values_shannon = list(decomposed_values.values())
@@ -312,7 +320,7 @@ def plot_full_shannon_county(county_name, decomposed_values):
     plt.close()
 
 
-
+# Part of the 5 fires test, processes fires and shannon values to determine 5 biggest fires
 def process_and_plot_for_county(county_name, fire_data, filtered_bird_data):
     fires = fire_data.get(county_name, {})
     if not fires:
@@ -333,7 +341,6 @@ def process_and_plot_for_county(county_name, fire_data, filtered_bird_data):
     plot_shannon_test(dates, decomposed_values, fires, county_name)
     lin_reg_counties(county_name, fire_data, decomposed_values)
     plot_full_shannon_county(county_name, decomposed_values)
-
 
 
 # Go through each county and plot them combine counties stored as FIPS CODE and plain text
@@ -378,6 +385,7 @@ def plot_shannon_for_all_counties(fire_path, bird_data_path):
             print(f"Failed to process {county_name}: {e}")
 
 
+# Plots the 5 biggest fires and a random fires alongside corresponding shannon values around that time
 def plot_shannon_test(dates, shannon_values, fires, county_name):
     shannon_dates = list(shannon_values.keys())
     FIRE_MARGIN = 30
@@ -433,25 +441,3 @@ def plot_shannon_test(dates, shannon_values, fires, county_name):
 
 db_path = "data/firedata.sqlite"
 bird_path = "data/filtered_for_counties.txt"
-# fires = extract_all_fires(db_path)
-
-
-#Commented function tests.
-
-# plot_shannon_for_all_counties(db_path, bird_path)
-# sorted_county = sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
-# shannon_day_values = shannon_index_by_day_for_array(sorted_county)
-# decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)
-# shannon_calculation.plot_shannon(decomposed_values)
-# monthly_fires = sqlHandling.fit_fires_to_months(fires['humboldt'])
-# sqlHandling.linear_regression_fires(monthly_fires, decomposed_values)
-
-# dates, sizes = get_largest_fires(fires, county)
-# shannon_values = {}
-# years = list(range(2006, 2016))
-# months = list(range(1, 13))
-# for year in years:
-#     for month in months:
-#         shannon_values[dt.date(year, month, 15)] = shannon_calculation.shannon_index_by_month(bird_path, month, year)
-# decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
-# plot_shannon_test(dates, decomposed_values, fires)

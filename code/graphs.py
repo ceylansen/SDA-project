@@ -5,6 +5,8 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import sys
 
+
+# Extracts fires from specific state between year1 and year2
 def extract_fires(state, year1, year2):
     db_path = 'data/FPA_FOD_20170508.sqlite'
     conn = sqlite3.connect(db_path)
@@ -32,6 +34,7 @@ def extract_fires(state, year1, year2):
     return sorted_fires
 
 
+# Computes shannon index of all sightings
 def shannon_index_sightings(file_path):
     species_counts = Counter()
 
@@ -51,11 +54,13 @@ def shannon_index_sightings(file_path):
     # Calculate Shannon index
     shannon_index = 0
     for count in species_counts.values():
-        p_i = count / total_sightings  # Proportion of species i
-        shannon_index -= p_i * math.log(p_i)  # Add to the Shannon index
+        p_i = count / total_sightings
+        shannon_index -= p_i * math.log(p_i)
 
     return shannon_index
 
+
+# Returns all ebird sightings
 def sightings_ebird(file_path, column_name, county):
     entries = {}
     with open(file_path, mode='r', encoding='utf-8') as csv_file:
@@ -68,19 +73,4 @@ def sightings_ebird(file_path, column_name, county):
                 entries[observation_date] = 1
             else:
                 entries[observation_date] += 1
-    # print(entries)
     return entries
-    # with open(f'{county}_sightings_per_year.txt', mode='w', encoding='utf-8') as txt_file:
-    #     for year, count in entries.items():
-    #         txt_file.write(f"{year}: {count}\n")
-
-file_path = 'data/ebd_US-CA_200805_200809_relOct-2024.txt'
-column_name = 'COMMON NAME'
-state = 'WV'
-county = 'All'
-if len(sys.argv) > 1:
-    county = sys.argv[1]
-
-# process_csv(file_path, column_name, county)
-# sightings = sightings_ebird(file_path, column_name, county)
-print(shannon_index_sightings(file_path))

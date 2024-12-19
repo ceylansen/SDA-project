@@ -4,6 +4,7 @@ import sys
 import datetime as dt
 
 
+# Processes ebird data
 def process_csv(file_path, column_name, county):
     entries = []
 
@@ -25,6 +26,7 @@ def process_csv(file_path, column_name, county):
     return entries
 
 
+# Extracts all sightings and groups them by year and writes to document
 def sightings_per_year(file_path, column_name, county):
     entries = {}
     with open(file_path, mode='r', encoding='utf-8') as csv_file:
@@ -54,6 +56,7 @@ def sightings_per_year(file_path, column_name, county):
             txt_file.write(f"{year}: {count}\n")
 
 
+# Extracts sightings per date from given file, caution: big files will crash when sorted
 def sightings_per_date(file_path):
     entries = {}
     with open(file_path, mode='r', encoding='utf-8') as csv_file:
@@ -68,19 +71,5 @@ def sightings_per_date(file_path):
                 entries[date] += 1
             else:
                 entries[date] = 1
-    # with open(f'{county}_sightings_per_year.txt', mode='w', encoding='utf-8') as txt_file:
-    #     for year, count in entries.items():
-    #         txt_file.write(f"{year}: {count}\n")
     sorted_dates = dict(sorted(entries.items()))
     return sorted_dates
-
-file_path = 'data/ebd_US-CA_200805_200809_relOct-2024.txt'
-column_name = 'COMMON NAME'
-state = 'WV'
-county = 'All'
-if len(sys.argv) > 1:
-    county = sys.argv[1]
-
-# process_csv(file_path, column_name, county)
-# sightings_per_year(file_path, column_name, county)
-# sightings_per_date(file_path)

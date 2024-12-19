@@ -13,9 +13,6 @@ import statsmodels.api as sm
 import numpy as np
 import seaborn as sns
 
-import ebirddatareader
-import shannon_calculation
-
 # code voor de bounding box van de hele land bird monitoring data set 2007-2017
 # cursor.execute(
 #     """
@@ -46,6 +43,7 @@ def get_real_date(julian_day):
     return dt.date.fromordinal(gregorian_ordinal)
 
 
+# Alternate linear regression function
 def linear_regression_fires_counties(fires, shannon_values, county_name="All", days=False):
     print(county_name)
     aggregated_fires = defaultdict(int)
@@ -97,6 +95,8 @@ def linear_regression_fires_counties(fires, shannon_values, county_name="All", d
     plt.close()
 
 
+# Applies linear regression between fires and shannon values and computes pearson coefficient,
+# p-value and r2 value
 def linear_regression_fires(fires, shannon_values, county_name="All", days=False, name=None):
     if days:
         for date in shannon_values:
@@ -127,20 +127,12 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
 
     r2 = r2_score(y, y_pred)
 
-    # X_with_const = sm.add_constant(x_normalized)
-    # sm_model = sm.OLS(y, X_with_const).fit()
-    # p_value = sm_model.pvalues[1]
-
     plt.scatter(x_normalized, shannon_values.values(), color='blue', label='Data')
     plt.plot(x_normalized, y_pred, color='red', label='Regression Line')
     plt.title(f'Linear regression {county_name} (2006-2015)', fontsize=14)
     plt.xlabel('Wildfires (Acres Burnt)')
-    # plt.xlim(0, 1)  # Focus on the dense cluster
-    # plt.xscale('log')
     plt.ylabel('Shannon Index')
     plt.legend()
-    # plt.show()
-    # plt.close()
     if name != None:
         plt.savefig(f'plots/{name}.png')
         plt.close()
@@ -153,6 +145,7 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     return r, p_value, r2
 
 
+# Plots linear regression results
 def plot_linear_regression_results(r_values, p_values, r2_values, name=None):
     fig, axs = plt.subplots(1, 2, figsize=(16, 6))
     # Pearson Coefficient vs. p-value
@@ -202,6 +195,7 @@ def plot_linear_regression_results(r_values, p_values, r2_values, name=None):
         plt.close(fig)
 
 
+# Extracts all fires from dataset of specific country between year1 and year2
 def extract_fires_county_year(db_path, county, year1, year2):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -234,6 +228,7 @@ def extract_fires_county_year(db_path, county, year1, year2):
     return sorted_fires
 
 
+# Extracts all fires for all counties between year1 and year2
 def extract_fires_for_year(db_path, year1, year2):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -266,6 +261,7 @@ def extract_fires_for_year(db_path, year1, year2):
     return sorted_fires
 
 
+# Extracts all fires
 def extract_fires(db_path, county, county_code=None):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -309,6 +305,7 @@ def extract_fires(db_path, county, county_code=None):
     return sorted_fires
 
 
+# Plots fires
 def plot_fires(fires):
     dates = list(fires.keys())
     fire_counts = list(fires.values())
@@ -327,6 +324,7 @@ def plot_fires(fires):
     plt.savefig('plots/fires.png')
 
 
+# Plots fires and bird sightings together
 def plot_fires_sightings(fires, sightings):
     dates_fires = list(fires.keys())
     fire_counts = list(fires.values())
@@ -361,14 +359,13 @@ def plot_fires_sightings(fires, sightings):
     plt.savefig('plots/sightings.png')
 
 
+# Plots fires against shannon index values
 def plot_shannon_fires(fires, shannon_values, name=None):
     dates_fires = list(fires.keys())
     fire_counts = list(fires.values())
-    # smoothed_data = gaussian_filter1d(fire_counts, sigma=5)
     dates_shannon = list(shannon_values.keys())
     values_shannon = list(shannon_values.values())
 
-    # plt.figure(figsize=(12, 10))
     fig, ax1 = plt.subplots()
     ax1.plot(dates_fires, fire_counts, label='Acres Burnt')
 
@@ -397,14 +394,3 @@ def plot_shannon_fires(fires, shannon_values, name=None):
     else:
         plt.show()
     plt.close()
-
-
-# db_path = 'data/firedata.sqlite'
-# fires = extract_fires(db_path, 'All')
-# max_fires = max(zip(fires.values(), fires.keys()))
-# print("Date with the largest fire:", max_fires)
-# shannon_values = shannon_calculation.shannon_index_by_month_CA()
-# shannon_calculation.shannon_fourier_decomposed(shannon_values)
-# monthly_fires = fit_fires_to_months(fires)
-# plot_shannon_fires(monthly_fires, shannon_values)
-# plot_shannon_fires(fires, decomposed_values)

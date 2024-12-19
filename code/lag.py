@@ -7,9 +7,10 @@ from collections import defaultdict
 from scipy.signal import correlate
 import shannon_fires, shannon_calculation, sqlHandling
 import seaborn as sns
-# from population import count_total_bird_population_by_county, adjust_for_userbase
 from scipy.signal import detrend
 
+
+# Fit shannon values to monthly intervals
 def fit_shannon_to_months_avg(shannon_values, test=False):
     monthly_totals = {}
     monthly_counts = {}
@@ -23,7 +24,6 @@ def fit_shannon_to_months_avg(shannon_values, test=False):
         else:
             monthly_totals[month] = value
             monthly_counts[month] = 1
-    # print(monthly_totals.keys())
 
     # Ensure all months are present
     if test:
@@ -52,6 +52,7 @@ def fit_shannon_to_months_avg(shannon_values, test=False):
     return sorted_monthly_averages
 
 
+# Fit fire data to monthly intervals
 def fit_fires_to_months(fires, testing=False):
     monthly_fires = defaultdict(int)
     for date, amount in fires.items():
@@ -78,6 +79,7 @@ def fit_fires_to_months(fires, testing=False):
     return monthly_fires
 
 
+# Equalizes two dicts, so that all keys are shared
 def equalize_dicts(dict1, dict2):
     new_dict1 = {}
     new_dict2 = {}
@@ -88,17 +90,15 @@ def equalize_dicts(dict1, dict2):
     return new_dict1, new_dict2
 
 
+# Applies cross-correlation to find best lag and best correlation between given fires
+# and shannon values
 def cross_correlate(shannon_values, fires, name=None):
     shannon_array = np.array(list(shannon_values.values()))
     fires_array = np.array(list(fires.values()))
 
-    # shannon_array = detrend(shannon_array)
-    # fires_array = detrend(fires_array)
-
     shannon_array = (shannon_array - np.mean(shannon_array)) / np.std(shannon_array)
     fires_array = (fires_array - np.mean(fires_array)) / np.std(fires_array)
 
-    # lag = np.arange(-max_lag, max_lag + 1)
     lag = np.arange(-len(shannon_array) + 1, len(fires_array))
     cross_corr = correlate(shannon_array, fires_array, mode='full', method='fft')
 
@@ -108,7 +108,6 @@ def cross_correlate(shannon_values, fires, name=None):
     print("best lag: ", best_lag)
     print("corresponding correlation value: ", best_correlation)
 
-    # print(lags)
     if name != None:
         plt.plot(lag, cross_corr)
         plt.xlabel('Lag (months)')
@@ -118,6 +117,7 @@ def cross_correlate(shannon_values, fires, name=None):
     return best_lag, best_correlation
 
 
+# Plots cross-correlate results
 def plot_lag_results(best_lags, best_correlations, name):
     fig, axs = plt.subplots(1, 3, figsize=(18, 6))
 

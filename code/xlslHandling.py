@@ -1,5 +1,7 @@
 import pandas as pd
 
+
+# Extracts entries from excel file
 def extract_entries_from_excel(file_path, sheet_name=None):
     """
     Extracts entries from an Excel file and returns the data as a DataFrame.
@@ -19,9 +21,3 @@ def extract_entries_from_excel(file_path, sheet_name=None):
         print(f"An error occurred: {e}")
         return None
 
-file_path = "data/NCRN LAND Bird Monitoring Data 2007 - 2017_Public.xlsx"  # Replace with your file path
-sheet_name = 'ANTI'       # Replace with your sheet name or leave as None for the first sheet
-data = extract_entries_from_excel(file_path, sheet_name)
-
-if data is not None:
-    print(data)

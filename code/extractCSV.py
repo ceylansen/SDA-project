@@ -1,6 +1,8 @@
 import csv
 import os
 
+
+# Extracts specific columns from file and writes to document
 def extract_column_entries(file_path):
     """
     Reads a CSV file and extracts all entries from a specified column.
@@ -37,6 +39,8 @@ def extract_column_entries(file_path):
         print(f"Error: {e}")
         return []
 
+
+# Counts sightings per unit code
 def count_sightings_perArea_perYear(file_path):
     area_code = 'DEWA'
     entries = {}
@@ -63,6 +67,7 @@ def count_sightings_perArea_perYear(file_path):
         return []
 
 
+# Counts unique entries
 def count_unique_entries(text_file):
     with open(text_file, mode='r', encoding='utf-8') as file:
         lines = file.readlines()
@@ -76,10 +81,3 @@ def count_unique_entries(text_file):
 
         return unique_counts
 
-file_path = 'data/NPS_ERMN_StreamsideBirdProtocol_2011_2022_Data_Certified.csv'
-column_name = 'Common_Name'
-# entries = extract_column_entries(file_path)
-count_sightings_perArea_perYear(file_path)
-# print(count_unique_entries('Common_Name.txt'))
-# print(count_unique_entries('DEWACommon_Name.txt'))
-# print(entries)

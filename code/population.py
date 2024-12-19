@@ -14,6 +14,7 @@ from lag import fit_fires_to_months, fit_shannon_to_months_avg, equalize_dicts
 import sqlHandling
 
 
+# Filters dataset for effort, which is classified as unique sampling events
 def filter_for_county_effort(input_file, county, output_dir='filtered'):
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -36,6 +37,7 @@ def filter_for_county_effort(input_file, county, output_dir='filtered'):
                     effort_file.write(f"{row['OBSERVATION DATE']}\t{row['SAMPLING EVENT IDENTIFIER']}\n")
 
 
+# Counts total bird sightings for a specified county
 def count_total_bird_population_by_county(county, file_path):
     print(county)
     sorted_county = shannon_fires.sort_county_by_date(file_path, f'{county}')
@@ -73,6 +75,7 @@ def count_total_bird_population_by_county(county, file_path):
     return shannon_values
 
 
+# Plots the bird sightings against the fires for a specific county
 def plot_population_fires_county(file_path, fire_path, county, name=None, linreg=False):
     db_path = fire_path
     total_observations = count_total_bird_population_by_county(f'{county}', file_path)
@@ -88,7 +91,6 @@ def plot_population_fires_county(file_path, fire_path, county, name=None, linreg
 
     avg_populations = fit_shannon_to_months_avg(smoothed_data_with_keys, True)
 
-    # detrended_populations = detrend(list(avg_populations.values()))
     detrended_populations = shannon_calculation.shannon_fourier_decomposed(avg_populations)
 
     monthly_fires = fit_fires_to_months(county_fires, True)
@@ -122,6 +124,7 @@ def plot_population_fires_county(file_path, fire_path, county, name=None, linreg
         return r, p_value, r2
 
 
+# Counts unique sampling events
 def count_sampling_events(file_path, county=None):
     # return sampling_events
     data = pd.read_csv(file_path, delimiter='\t')
@@ -168,8 +171,3 @@ def linear_regression_test():
     counties = ['Humboldt', 'Orange', 'Mendocino', 'San Diego', 'San Bernardino']
     for county in counties:
         plot_population_fires_county(f'{county}')
-
-
-# filter_for_county_effort('data/ebd_2006_2015.txt', 'San Bernardino')
-# plot_population_fires_county('Orange')
-# plot_adjusted_bird_count('Humboldt')
