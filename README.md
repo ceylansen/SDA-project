@@ -13,7 +13,21 @@ regression_per_county_plots: Plots of the linear regression between the shannon 
 California_plots: Contains a mix of all of the above with some added self-explanatory plots contained in the same folder for the whole state
 
 
-# To test the code run testing.py to run all implemented functionality. The tests are using a small sample of our very large original dataset
+# To test the code run testing.py in the following way: python testing.py <test_number>. The tests are using a small sample of our very large original dataset
+
+Test 1: Plots the state wide shannon index against the forest fires in the whole state
+Test 2: Plots the state wide decomposed shannon index fluctuations against the forest fires in the whole state
+Test 3: plots the decomposed shannon index for each county against its respective forest fires
+Test 4: Apply linear regression to each shannon index plot of every county
+Test 5: Takes the 5 biggest fires in each county and plots it together with a random fire and their respective shannon indeces
+Test 6: Plots the weighted total bird sightings for each month in each state against that states's fires
+Test 7: Applies linear regression to the weighted bird sightings and the fires
+Test 8: Computes the best lag and the corresponding correlation for each county's shannon index using cross correlation
+Test 9: Computes the best lag and the corresponding correlation for each county's weighted sightings using cross correlation
+
+Each test saves the graphs in the plots folder.
+
+# NOTE: Some tests do still take around 2 minutes or so to complete, however, for tests 3, 5 and 6 you can end prematurely since they save each graph after finishing a state, so you do not have to wait for every state to finish. They should all be manageable from our testing.
 
 
 Libraries used one might not already have:

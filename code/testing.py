@@ -157,7 +157,7 @@ tests = {
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python <script_name.py> <test_number>")
+        print("Usage: python testing.py <test_number>")
         print("Available tests:")
         for num, (description, _) in tests.items():
             print(f"  {num}: {description}")
