@@ -173,7 +173,6 @@ def main():
             print(f"  {num}: {description}")
         sys.exit(1)
 
-    # Print test name and run the selected test
     test_name, test_function = tests[test_number]
     print(f"Running Test {test_number}: {test_name}")
     if test_number in [1, 2, 3, 4, 5, 6, 8, 9]:
