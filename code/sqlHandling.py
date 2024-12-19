@@ -142,7 +142,7 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     # plt.show()
     # plt.close()
     if name != None:
-        plt.savefig(f'{name}.png')
+        plt.savefig(f'plots/{name}.png')
         plt.close()
     else:
         print(f"Pearson Correlation Coefficient: {r:.4f}")
@@ -179,9 +179,12 @@ def plot_linear_regression_results(r_values, p_values, r2_values, name=None):
         ax=axs[1],
         x=r2_values,
         y=p_values,
+        hue=np.array(p_values) < 0.05,
+        palette={True: 'red', False: 'blue'},
         legend=False,
         s=100
     )
+    axs[1].axhline(0.05, color='gray', linestyle='--', linewidth=1, label='p = 0.05')
     axs[1].set_title('$R^2$ vs. p-value', fontsize=16)
     axs[1].set_xlabel('$R^2$', fontsize=14)
     axs[1].set_ylabel('p-value', fontsize=14)
@@ -192,7 +195,7 @@ def plot_linear_regression_results(r_values, p_values, r2_values, name=None):
     plt.tight_layout()
 
     if name is not None:
-        plt.savefig(f'{name}.png')
+        plt.savefig(f'plots/{name}.png')
         plt.close(fig)
     else:
         plt.show()

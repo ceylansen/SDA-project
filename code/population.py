@@ -112,7 +112,7 @@ def plot_population_fires_county(file_path, fire_path, county, name=None, linreg
         plt.title('Amount of acres burnt in CA against total observations (2006-2015)', fontsize=14)
         fig.tight_layout()
         if name != None:
-            plt.savefig(f'{name}.png')
+            plt.savefig(f'plots/{name}.png')
         plt.close()
 
     # Linear regression part

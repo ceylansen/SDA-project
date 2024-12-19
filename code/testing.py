@@ -1,6 +1,7 @@
 import datetime as dt
 import sqlHandling, shannon_calculation, shannon_fires, population, lag
 from scipy.ndimage import gaussian_filter1d
+import sys
 
 
 # Test 1: Plots the state wide shannon index against the forest fires in the whole state
@@ -31,7 +32,7 @@ def state_wide_sIndex_decomposed_vs_fires(file_path, fire_path):
     sqlHandling.plot_shannon_fires(fires, decomposed_values, 't2_decomposed_index_vs_fires')
 
 
-# Test 3
+# Test 3: plots the decomposed shannon index for each county against its respective forest fires
 def county_level_sIndex_decomposed_vs_fires(file_path, fire_path):
     print("Start test 3: Decompose county level Shannon index and plot vs acres burnt for each county...")
     fires = shannon_fires.extract_all_fires(fire_path)
@@ -45,6 +46,7 @@ def county_level_sIndex_decomposed_vs_fires(file_path, fire_path):
         sqlHandling.plot_shannon_fires(county_fires, avg_values, f't3_{county}')
 
 
+# Test 4: Apply linear regression to each shannon index plot of every county
 def linear_regression_county_shannon(file_path, fire_path):
     print("Start test 4: Apply linear regression to each counties decomposed shannon index and fires...")
     r_values = []
@@ -67,21 +69,26 @@ def linear_regression_county_shannon(file_path, fire_path):
     sqlHandling.plot_linear_regression_results(r_values, p_values, r2_values, 't4_all_results')
 
 
+# Test 5: Takes the 5 biggest fires in each county and plots it together with a random fire and
+# their respective shannon indeces
 def plot_5_biggest_fires_per_county(bird_path, fire_path):
     print("Plotting 5 biggest fires, linear regression and shannon values per county ")
     shannon_fires.plot_shannon_for_all_counties(fire_path, bird_path)
 
 
+# Test 6: Plots the weighted total bird sightings for each month in each state against that states's
+# fires
 def population_numbers_county(file_path, fire_path):
-    print("Start test 5: Decompose county level bird sightings and plot vs acres burnt for each county...")
+    print("Start test 6: Decompose county level bird sightings and plot vs acres burnt for each county...")
     fires = shannon_fires.extract_all_fires(fire_path)
     for county in shannon_fires.counties_standalone:
         print(f'Testing for {county}...')
-        population.plot_population_fires_county(file_path, fire_path, county, f't5_{county}')
+        population.plot_population_fires_county(file_path, fire_path, county, f't6_{county}')
 
 
+# Test 7: Applies linear regression to the weighted bird sightings and the fires
 def linear_regression_county_population(file_path):
-    print("Start test 6: Linear regression bird sightings")
+    print("Start test 7: Linear regression bird sightings")
     r_values = []
     p_values = []
     r2_values = []
@@ -91,11 +98,13 @@ def linear_regression_county_population(file_path):
         r_values.append(r)
         p_values.append(p_value)
         r2_values.append(r2)
-    sqlHandling.plot_linear_regression_results(r_values, p_values, r2_values, 't6_all_results')
+    sqlHandling.plot_linear_regression_results(r_values, p_values, r2_values, 't7_all_results')
 
 
+# Test 8: Computes the best lag and the corresponding correlation for each county's shannon index
+# using cross correlation
 def lag_shannon_index(file_path, fire_path):
-    print("Start test 7: Lag of shannon index")
+    print("Start test 8: Lag of shannon index")
     fires = shannon_fires.extract_all_fires(fire_path)
     best_lags = []
     best_correlations = []
@@ -108,11 +117,13 @@ def lag_shannon_index(file_path, fire_path):
         best_lag, best_correlation = lag.cross_correlate(decomposed_values, monthly_fires)
         best_lags.append(best_lag)
         best_correlations.append(best_correlation)
-    lag.plot_lag_results(best_lags, best_correlations, f't7_results')
+    lag.plot_lag_results(best_lags, best_correlations, f't8_results')
 
 
+# Test 9: Computes the best lag and the corresponding correlation for each county's weighted sightings
+# using cross correlation
 def lag_population_numbers(file_path, fire_path):
-    print("Start test 8: Lag of bird sightings")
+    print("Start test 9: Lag of bird sightings")
     fires = shannon_fires.extract_all_fires(fire_path)
     best_lags = []
     best_correlations = []
@@ -126,16 +137,51 @@ def lag_population_numbers(file_path, fire_path):
         best_lag, best_correlation = lag.cross_correlate(decomposed_values, monthly_fires)
         best_lags.append(best_lag)
         best_correlations.append(best_correlation)
-    lag.plot_lag_results(best_lags, best_correlations, f't8_results')
+    lag.plot_lag_results(best_lags, best_correlations, f't9_results')
 
 
 bird_path = 'data/trimmed_dataset.txt'
 fire_path = 'data/trimmed_firedata.sqlite'
-# state_wide_sIndex_vs_fires(bird_path, fire_path)
-# state_wide_sIndex_decomposed_vs_fires(bird_path, fire_path)
-# county_level_sIndex_decomposed_vs_fires(bird_path, fire_path)
-# linear_regression_county_shannon(bird_path, fire_path)
-# population_numbers_county(bird_path, fire_path)
-# lag_shannon_index(bird_path, fire_path)
-# lag_population_numbers(bird_path, fire_path)
-plot_5_biggest_fires_per_county(bird_path, fire_path)
+
+tests = {
+    1: ("State-wide Shannon index vs. fires", state_wide_sIndex_vs_fires),
+    2: ("State-wide decomposed Shannon index vs. fires", state_wide_sIndex_decomposed_vs_fires),
+    3: ("County-level decomposed Shannon index vs. fires", county_level_sIndex_decomposed_vs_fires),
+    4: ("Linear regression of county Shannon index and fires", linear_regression_county_shannon),
+    5: ("Plot 5 biggest fires per county", plot_5_biggest_fires_per_county),
+    6: ("Population numbers vs. fires per county", population_numbers_county),
+    7: ("Linear regression of population numbers and fires", linear_regression_county_population),
+    8: ("Lag analysis of Shannon index", lag_shannon_index),
+    9: ("Lag analysis of population numbers", lag_population_numbers),
+}
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python <script_name.py> <test_number>")
+        print("Available tests:")
+        for num, (description, _) in tests.items():
+            print(f"  {num}: {description}")
+        sys.exit(1)
+
+    try:
+        test_number = int(sys.argv[1])
+        if test_number not in tests:
+            raise ValueError
+    except ValueError:
+        print("Invalid test number. Please choose a valid test number from the list:")
+        for num, (description, _) in tests.items():
+            print(f"  {num}: {description}")
+        sys.exit(1)
+
+    # Print test name and run the selected test
+    test_name, test_function = tests[test_number]
+    print(f"Running Test {test_number}: {test_name}")
+    if test_number in [1, 2, 3, 4, 5, 6, 8, 9]:
+        test_function(bird_path, fire_path)
+    elif test_number == 7:
+        test_function(bird_path)
+    else:
+        print(f"No implementation for test {test_number}")
+
+if __name__ == "__main__":
+    main()

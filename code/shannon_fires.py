@@ -438,7 +438,7 @@ bird_path = "data/filtered_for_counties.txt"
 
 #Commented function tests.
 
-plot_shannon_for_all_counties(db_path, bird_path)
+# plot_shannon_for_all_counties(db_path, bird_path)
 # sorted_county = sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
 # shannon_day_values = shannon_index_by_day_for_array(sorted_county)
 # decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)

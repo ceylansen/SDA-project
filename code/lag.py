@@ -141,6 +141,6 @@ def plot_lag_results(best_lags, best_correlations, name):
     axs[2].grid(alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(f"{name}_lag_results.png")
+    plt.savefig(f"plots/{name}_lag_results.png")
     plt.close(fig)
 
