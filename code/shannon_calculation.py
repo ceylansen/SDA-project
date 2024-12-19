@@ -13,6 +13,7 @@ from statsmodels.tsa.stattools import adfuller
 import os
 
 
+# Filters dataset to specified years and saves necessary columns
 def filter_for_county(input_file, year = list, output_dir='filtered'):
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -38,30 +39,30 @@ def filter_for_county(input_file, year = list, output_dir='filtered'):
                     year_file.write(f"{row['OBSERVATION DATE']}\t{row['COMMON NAME']}\t{row['COUNTY']}\t{row['COUNTY CODE']}\n")
 
 
-def split_by_year_species(input_file, output_dir, target_year, date_column='OBSERVATION DATE', common_name_column='COMMON NAME'):
-    # Ensure the output directory exists
-    os.makedirs(output_dir, exist_ok=True)
+# def split_by_year_species(input_file, output_dir, target_year, date_column='OBSERVATION DATE', common_name_column='COMMON NAME'):
+#     # Ensure the output directory exists
+#     os.makedirs(output_dir, exist_ok=True)
 
-    with open(input_file, mode='r', encoding='utf-8') as csv_file:
-        print("reading in file...")
-        csv_reader = csv.DictReader(csv_file, delimiter='\t')
-        csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
+#     with open(input_file, mode='r', encoding='utf-8') as csv_file:
+#         print("reading in file...")
+#         csv_reader = csv.DictReader(csv_file, delimiter='\t')
+#         csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
 
-        year_file_path = os.path.join(output_dir, f"{target_year}.txt")
+#         year_file_path = os.path.join(output_dir, f"{target_year}.txt")
 
-        print("writing to file")
-        with open(year_file_path, 'w') as year_file:
-            # Write the header to the output file
-            year_file.write(f"{date_column}\t{common_name_column}\n")
+#         print("writing to file")
+#         with open(year_file_path, 'w') as year_file:
+#             # Write the header to the output file
+#             year_file.write(f"{date_column}\t{common_name_column}\n")
 
-            for row in csv_reader:
-                date = row['OBSERVATION DATE']
-                # Extract the year from the date
-                year = date.split('-')[0]  # Assumes date is in YYYY-MM-DD format
+#             for row in csv_reader:
+#                 date = row['OBSERVATION DATE']
+#                 # Extract the year from the date
+#                 year = date.split('-')[0]  # YYYY-MM-DD format
 
-                if int(year) == target_year:
-                    # Write the line to the output file if it matches the target year
-                    year_file.write(f"{row[date_column]}\t{row[common_name_column]}\n")
+#                 if int(year) == target_year:
+#                     # Write the line to the output file if it matches the target year
+#                     year_file.write(f"{row[date_column]}\t{row[common_name_column]}\n")
 
 
 def sort_year_by_date(input_file, output_file, date_column='OBSERVATION DATE'):
@@ -101,6 +102,7 @@ def fourier_filter(frequency, shannon_values):
     pass
 
 
+# Applies FFT to the shannon values and decomposes the plot into low and high frequency
 def shannon_fourier_decomposed(shannon_values, name=None):
     values = list(shannon_values.values())
     n = len(values)  # Number of samples
@@ -111,17 +113,17 @@ def shannon_fourier_decomposed(shannon_values, name=None):
 
     # Separate components
     dc_component = np.zeros_like(fft_values)
-    dc_component[0] = fft_values[0]  # Only keep the mean (DC component)
+    dc_component[0] = fft_values[0]
 
     low_frequency_component = np.zeros_like(fft_values)
     high_frequency_component = np.zeros_like(fft_values)
 
-    cutoff_frequency = 0.1  # Define cutoff frequency
+    cutoff_frequency = 0.1
     low_frequency_component[np.abs(frequencies) < cutoff_frequency] = fft_values[np.abs(frequencies) < cutoff_frequency]
 
     high_frequency_component[np.abs(frequencies) >= cutoff_frequency] = fft_values[np.abs(frequencies) >= cutoff_frequency]
 
-    # Inverse FFT to reconstruct each component
+    # Reconstruct each component
     dc_reconstructed = np.fft.ifft(dc_component).real
     low_frequency_reconstructed = np.fft.ifft(low_frequency_component).real
     high_frequency_reconstructed = np.fft.ifft(high_frequency_component).real
@@ -173,6 +175,7 @@ def shannon_fourier_decomposed(shannon_values, name=None):
     return decomposed_values
 
 
+# Calculates shannon index
 def calc_shannon(species_counts):
     total_sightings = sum(species_counts.values())
     shannon_index = 0
@@ -216,7 +219,7 @@ def shannon_index_by_day(file_path):
             common_name = row["COMMON NAME"].strip()
             species_counts[common_name] += 1
 
-        # Handle the final day's data
+        # Handle final day's data
         if species_counts:
             shannon_index = calc_shannon(species_counts)
             shannon_values[current_date] = shannon_index
@@ -224,6 +227,8 @@ def shannon_index_by_day(file_path):
     # print(shannon_values)
     return shannon_values
 
+
+# Shannon index of whole dataset
 def shannon_index_sightings(file_path):
     species_counts = Counter()
 
@@ -244,6 +249,7 @@ def shannon_index_sightings(file_path):
     return shannon_index
 
 
+# Shannon index for given yy-mm
 def shannon_index_by_month(file_path, month, year):
     species_counts = Counter()
 
@@ -270,6 +276,7 @@ def shannon_index_by_month(file_path, month, year):
     return shannon_index
 
 
+# Helper function that made database more manageable
 def shannon_concatenate_days():
     years = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015]
     all_shannon_values = {}
@@ -279,6 +286,7 @@ def shannon_concatenate_days():
     return all_shannon_values
 
 
+# Plots shannon values
 def plot_shannon(shannon_values):
     dates_shannon = list(shannon_values.keys())
     values_shannon = list(shannon_values.values())

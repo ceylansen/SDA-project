@@ -95,7 +95,7 @@ def linear_regression_fires_counties(fires, shannon_values, county_name="All", d
     plt.close()
 
 
-def linear_regression_fires(fires, shannon_values, county_name="All", days=False):
+def linear_regression_fires(fires, shannon_values, county_name="All", days=False, name=None):
     if days:
         print("check")
         for date in shannon_values:
@@ -106,35 +106,25 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     dates_shannon = list(shannon_values.keys())
     X = np.array(list(fires.values())).reshape(-1, 1)
     y = np.array(list(shannon_values.values()))
-    # scaler = StandardScaler()
-    # x_normalized = scaler.fit_transform(X.reshape(-1, 1))
     x_normalized = (X - X.min()) / (X.max() - X.min())
-    # Create and fit the model
-    # model = LinearRegression()
     model = HuberRegressor()
     model.fit(x_normalized, y)
 
     slope = model.coef_[0]
     intercept = model.intercept_
-
-    # Predict Shannon index based on wildfire data
     y_pred = model.predict(x_normalized)
 
     x_new = np.array(list(fires.values()))
     data = {'X': x_new, 'y': y}
     df = pd.DataFrame(data)
     r, p_value = pearsonr(df['X'], df['y'])
-    print(f"Pearson Correlation Coefficient: {r:.4f}")
-    print(f"P-value: {p_value:.4f}")
 
     r2 = r2_score(y, y_pred)
 
-    X_with_const = sm.add_constant(x_normalized)  # Add intercept to the model
-    sm_model = sm.OLS(y, X_with_const).fit()
-    p_value = sm_model.pvalues[1]  # p-value for the slope coefficient
-    print("p-value slope: ", p_value)
+    # X_with_const = sm.add_constant(x_normalized)
+    # sm_model = sm.OLS(y, X_with_const).fit()
+    # p_value = sm_model.pvalues[1]
 
-    print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
     plt.scatter(x_normalized, shannon_values.values(), color='blue', label='Data')
     plt.plot(x_normalized, y_pred, color='red', label='Regression Line')
     plt.title(f'Linear regression {county_name} (2006-2015)', fontsize=14)
@@ -143,8 +133,19 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     # plt.xscale('log')
     plt.ylabel('Shannon Index')
     plt.legend()
-    plt.show()
-    plt.close()
+    # plt.show()
+    # plt.close()
+    if name != None:
+        plt.savefig(f'{name}.png')
+    else:
+        print(f"Pearson Correlation Coefficient: {r:.4f}")
+        print("p-value: ", p_value)
+        print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
+    return r, p_value, r2
+
+
+def plot_linear_regression_results(r_values, p_values, r2_values):
+    pass
 
 
 def extract_fires_county_year(db_path, county, year1, year2):
