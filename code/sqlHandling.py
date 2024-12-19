@@ -11,6 +11,7 @@ from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 import statsmodels.api as sm
 import numpy as np
+import seaborn as sns
 
 import ebirddatareader
 import shannon_calculation
@@ -98,16 +99,20 @@ def linear_regression_fires_counties(fires, shannon_values, county_name="All", d
 
 def linear_regression_fires(fires, shannon_values, county_name="All", days=False, name=None):
     if days:
-        print("check")
         for date in shannon_values:
             if fires.get(date, False) == False:
                 fires[date] = 0
 
+    if len(fires) < 2 or len(shannon_values) < 2:
+        return 0, 0, 0
+
     dates_fires = list(fires.keys())
     dates_shannon = list(shannon_values.keys())
     X = np.array(list(fires.values())).reshape(-1, 1)
+    X = np.nan_to_num(X, nan=0.0)
     y = np.array(list(shannon_values.values()))
     x_normalized = (X - X.min()) / (X.max() - X.min())
+    x_normalized = np.nan_to_num(x_normalized, nan=0.0)
     model = HuberRegressor()
     model.fit(x_normalized, y)
 
@@ -137,16 +142,61 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     # plt.show()
     # plt.close()
     if name != None:
-        plt.savefig(f'plots{name}.png')
+        plt.savefig(f'{name}.png')
+        plt.close()
     else:
         print(f"Pearson Correlation Coefficient: {r:.4f}")
         print("p-value: ", p_value)
         print(f"Slope: {slope}, Intercept: {intercept}, R²: {r2}")
+        plt.show()
+        plt.close()
     return r, p_value, r2
 
 
-def plot_linear_regression_results(r_values, p_values, r2_values):
-    pass
+def plot_linear_regression_results(r_values, p_values, r2_values, name=None):
+    fig, axs = plt.subplots(1, 2, figsize=(16, 6))
+    # Pearson Coefficient vs. p-value
+    sns.scatterplot(
+        ax=axs[0],
+        x=r_values,
+        y=p_values,
+        hue=np.array(p_values) < 0.05,
+        palette={True: 'red', False: 'blue'},
+        legend="brief",
+        s=100
+    )
+    axs[0].axhline(0.05, color='gray', linestyle='--', linewidth=1, label='p = 0.05')
+    axs[0].set_title('Pearson Coefficient vs. p-value', fontsize=16)
+    axs[0].set_xlabel('Pearson Coefficient', fontsize=14)
+    axs[0].set_ylabel('p-value', fontsize=14)
+    axs[0].set_xlim(-1, 1)
+    axs[0].set_ylim(0, 1)
+    axs[0].legend(title='Significant (p < 0.05)', loc='upper right')
+    axs[0].grid(alpha=0.3)
+
+    # R^2 vs. p-value
+    sns.scatterplot(
+        ax=axs[1],
+        x=r2_values,
+        y=p_values,
+        legend=False,
+        s=100
+    )
+    axs[1].set_title('$R^2$ vs. p-value', fontsize=16)
+    axs[1].set_xlabel('$R^2$', fontsize=14)
+    axs[1].set_ylabel('p-value', fontsize=14)
+    axs[1].set_xlim(0, 1)
+    axs[1].set_ylim(0, 1)
+    axs[1].grid(alpha=0.3)
+
+    plt.tight_layout()
+
+    if name is not None:
+        plt.savefig(f'{name}.png')
+        plt.close(fig)
+    else:
+        plt.show()
+        plt.close(fig)
 
 
 def extract_fires_county_year(db_path, county, year1, year2):
@@ -343,6 +393,7 @@ def plot_shannon_fires(fires, shannon_values, name=None):
         plt.savefig(f'plots/{name}.png')
     else:
         plt.show()
+    plt.close()
 
 
 # db_path = 'data/firedata.sqlite'
