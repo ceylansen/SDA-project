@@ -69,7 +69,7 @@ def linear_regression_county_shannon(file_path, fire_path):
 
 def plot_5_biggest_fires_per_county(bird_path, fire_path):
     print("Plotting 5 biggest fires, linear regression and shannon values per county ")
-    shannon_fires.plot_shannon_for_all_counties(bird_path, fire_path)
+    shannon_fires.plot_shannon_for_all_counties(fire_path, bird_path)
 
 
 def population_numbers_county(file_path, fire_path):
