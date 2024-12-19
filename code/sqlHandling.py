@@ -26,6 +26,7 @@ import shannon_calculation
 #     """
 #     )
 
+
 # fit fires dataset which is based on days, to the total acres burnt in that month
 def fit_fires_to_months(fires):
     monthly_fires = defaultdict(int)

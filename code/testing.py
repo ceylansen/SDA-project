@@ -85,7 +85,7 @@ def lag_population_numbers():
 
 
 bird_path = 'data/trimmed_dataset.txt'
-fire_path = 'data/firedata.sqlite'
+fire_path = 'data/trimmed_firedata.sqlite'
 # state_wide_sIndex_vs_fires(bird_path, fire_path)
 # state_wide_sIndex_decomposed_vs_fires(bird_path, fire_path)
-county_level_sIndex_decomposed_vs_fires(bird_path, fire_path)
+# county_level_sIndex_decomposed_vs_fires(bird_path, fire_path)
