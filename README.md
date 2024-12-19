@@ -14,3 +14,11 @@ California_plots: Contains a mix of all of the above with some added self-explan
 
 
 # To test the code run testing.py to run all implemented functionality. The tests are using a small sample of our very large original dataset
+
+
+Libraries used one might not already have:
+sqlite3
+statsmodels
+csv
+scipy
+sklearn
