@@ -92,7 +92,7 @@ def linear_regression_fires_counties(fires, shannon_values, county_name="All", d
     plt.ylabel('Shannon Index')
     plt.ylim(-3, 3)
     plt.legend()
-    plt.savefig(f"regression_{county_name}.png")
+    plt.savefig(f"plots/regression_{county_name}.png")
     plt.close()
 
 
@@ -137,7 +137,7 @@ def linear_regression_fires(fires, shannon_values, county_name="All", days=False
     # plt.show()
     # plt.close()
     if name != None:
-        plt.savefig(f'{name}.png')
+        plt.savefig(f'plots{name}.png')
     else:
         print(f"Pearson Correlation Coefficient: {r:.4f}")
         print("p-value: ", p_value)
@@ -271,7 +271,7 @@ def plot_fires(fires):
     plt.legend(fontsize=10)
 
     plt.tight_layout()
-    plt.savefig('fires.png')
+    plt.savefig('plots/fires.png')
 
 
 def plot_fires_sightings(fires, sightings):
@@ -291,7 +291,7 @@ def plot_fires_sightings(fires, sightings):
     plt.legend(fontsize=10)
 
     plt.tight_layout()
-    plt.savefig('fires.png')
+    plt.savefig('plots/fires.png')
 
     plt.figure(figsize=(10, 6))
 
@@ -305,7 +305,7 @@ def plot_fires_sightings(fires, sightings):
     plt.legend(fontsize=10)
 
     plt.tight_layout()
-    plt.savefig('sightings.png')
+    plt.savefig('plots/sightings.png')
 
 
 def plot_shannon_fires(fires, shannon_values, name=None):
@@ -340,7 +340,7 @@ def plot_shannon_fires(fires, shannon_values, name=None):
     plt.title('Amount of acres burnt in CA against shannon index (2006-2015)', fontsize=14)
     fig.tight_layout()
     if name != None:
-        plt.savefig(f'{name}.png')
+        plt.savefig(f'plots/{name}.png')
     else:
         plt.show()
 
