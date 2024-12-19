@@ -136,13 +136,13 @@ counties_standalone = ['Alameda', 'Alpine', 'Amador', 'Butte', 'Calaveras', 'Col
  'Contra Costa', 'Del Norte', 'El Dorado', 'Fresno', 'Glenn',
  'Humboldt', 'Imperial', 'Inyo', 'Kern', 'Kings', 'Lake',
  'Lassen', 'Los Angeles', 'Madera', 'Marin', 'Mariposa',
- 'Mendocino', 'Merced', 'Mdoc', 'Mono', 'Monterey', 'Napa',
+ 'Mendocino', 'Merced', 'Modoc', 'Mono', 'Monterey', 'Napa',
  'Nevada', 'Orange', 'Placer', 'Plumas', 'Riverside',
  'Sacramento', 'San Benito', 'San Bernardino', 'San Diego',
- 'San Francisco', 'San Joaquin', 'San Luis Obispo', 'San Mateo',
+ 'San Luis Obispo', 'San Mateo',
  'Santa Barbara', 'Santa Clara', 'Santa Cruz', 'Shasta',
  'Sierra', 'Siskiyou', 'Solano', 'Sonoma', 'Stanislaus',
- 'Sutter', 'Tehama', 'Trinity', 'Tulare', 'Tuolumne',
+ 'Tehama', 'Trinity', 'Tulare', 'Tuolumne',
  'Ventura', 'Yolo', 'Yuba']
 
 
@@ -191,14 +191,14 @@ def sort_county_by_date(input_file, output_file, county):
         csv_reader = csv.DictReader(file, delimiter='\t')
         csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]
 
-        print(csv_reader.fieldnames)
-        if "'COUNTY'" not in csv_reader.fieldnames:
+        # print(csv_reader.fieldnames)
+        if "COUNTY" not in csv_reader.fieldnames:
             raise ValueError(f"Column must be present in the file.")
 
         print("appending...")
         entries = []
         for row in csv_reader:
-            if row["'COUNTY'"] == county:
+            if row["COUNTY"] == county:
                 entries.append(row)
 
         print("sorting...")
@@ -234,7 +234,7 @@ def shannon_index_by_day_for_array(data):
             species_counts.clear()
 
         # Add species for the current row
-        common_name = row["'COMMON NAME'"].strip()
+        common_name = row["COMMON NAME"].strip()
         species_counts[common_name] += 1
 
     # Handle the final day's data

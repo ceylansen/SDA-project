@@ -9,7 +9,7 @@ import shannon_fires, shannon_calculation, sqlHandling
 # from population import count_total_bird_population_by_county, adjust_for_userbase
 from scipy.signal import detrend
 
-def fit_shannon_to_months_avg(shannon_values):
+def fit_shannon_to_months_avg(shannon_values, test=False):
     monthly_totals = {}  # To store the sum of values for each month
     monthly_counts = {}  # To store the count of values for each month
 
@@ -22,21 +22,33 @@ def fit_shannon_to_months_avg(shannon_values):
         else:
             monthly_totals[month] = value
             monthly_counts[month] = 1
+    # print(monthly_totals.keys())
 
     # Ensure all months from 2006 to 2016 are represented
-    for year in range(2006, 2016):
-        for month in range(1, 13):
-            date = dt.date(year, month, 15)
-            if date not in monthly_totals:
-                monthly_totals[date] = 0
-                monthly_counts[date] = 0
+    if test:
+        for year in range(2006, 2008):
+            for month in range(1, 13):
+                if year == 2008 and month > 10:
+                    break
+                date = dt.date(year, month, 15)
+                if date not in monthly_totals:
+                    monthly_totals[date] = 0
+                    monthly_counts[date] = 0
+    else:
+        for year in range(2006, 2016):
+            for month in range(1, 13):
+                date = dt.date(year, month, 15)
+                if date not in monthly_totals:
+                    monthly_totals[date] = 0
+                    monthly_counts[date] = 0
 
     # Calculate the average for each month
     monthly_averages = {
         month: (monthly_totals[month] / monthly_counts[month]) if monthly_counts[month] > 0 else 0
         for month in monthly_totals
     }
-    return monthly_averages
+    sorted_monthly_averages = dict(sorted(monthly_averages.items()))
+    return sorted_monthly_averages
 
 
 def fit_fires_to_months(fires):
