@@ -186,7 +186,7 @@ def shannon_index_by_month_filtered(filtered_bird_data, month, year):
     return shannon_index
 
 
-def sort_county_by_date(input_file, output_file, county):
+def sort_county_by_date(input_file, county):
     with open(input_file, mode='r', encoding='utf-8') as file:
         csv_reader = csv.DictReader(file, delimiter='\t')
         csv_reader.fieldnames = [name.strip() for name in csv_reader.fieldnames]

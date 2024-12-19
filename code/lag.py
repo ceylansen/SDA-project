@@ -6,16 +6,17 @@ from scipy.ndimage import gaussian_filter1d
 from collections import defaultdict
 from scipy.signal import correlate
 import shannon_fires, shannon_calculation, sqlHandling
+import seaborn as sns
 # from population import count_total_bird_population_by_county, adjust_for_userbase
 from scipy.signal import detrend
 
 def fit_shannon_to_months_avg(shannon_values, test=False):
-    monthly_totals = {}  # To store the sum of values for each month
-    monthly_counts = {}  # To store the count of values for each month
+    monthly_totals = {}
+    monthly_counts = {}
 
     # Aggregate values into months
     for date, value in shannon_values.items():
-        month = dt.date(date.year, date.month, 15)  # Use the 15th as the representative date
+        month = dt.date(date.year, date.month, 15)
         if month in monthly_totals:
             monthly_totals[month] += value
             monthly_counts[month] += 1
@@ -24,7 +25,7 @@ def fit_shannon_to_months_avg(shannon_values, test=False):
             monthly_counts[month] = 1
     # print(monthly_totals.keys())
 
-    # Ensure all months from 2006 to 2016 are represented
+    # Ensure all months are present
     if test:
         for year in range(2006, 2008):
             for month in range(1, 13):
@@ -51,7 +52,7 @@ def fit_shannon_to_months_avg(shannon_values, test=False):
     return sorted_monthly_averages
 
 
-def fit_fires_to_months(fires):
+def fit_fires_to_months(fires, testing=False):
     monthly_fires = defaultdict(int)
     for date, amount in fires.items():
         # month = date.strftime('%Y-%m')  # Format as 'YYYY-MM'
@@ -59,16 +60,35 @@ def fit_fires_to_months(fires):
         monthly_fires[index] += amount
     monthly_fires = dict(monthly_fires)
 
-    for year in range(2006, 2016):
-        for month in range(1, 13):
-            date = dt.date(year, month, 15)
-            if date not in monthly_fires:
-                monthly_fires[date] = 0
+    if testing:
+        for year in range(2006, 2009):
+            for month in range(1, 13):
+                if year == 2008 and month > 10:
+                    break
+                date = dt.date(year, month, 15)
+                if date not in monthly_fires:
+                    monthly_fires[date] = 0
+    else:
+        for year in range(2006, 2016):
+            for month in range(1, 13):
+                date = dt.date(year, month, 15)
+                if date not in monthly_fires:
+                    monthly_fires[date] = 0
 
     return monthly_fires
 
 
-def cross_correlate(shannon_values, fires):
+def equalize_dicts(dict1, dict2):
+    new_dict1 = {}
+    new_dict2 = {}
+    for key in dict1.keys():
+        if dict1.get(key, False) and dict2.get(key, False):
+            new_dict1[key] = dict1[key]
+            new_dict2[key] = dict2[key]
+    return new_dict1, new_dict2
+
+
+def cross_correlate(shannon_values, fires, name=None):
     shannon_array = np.array(list(shannon_values.values()))
     fires_array = np.array(list(fires.values()))
 
@@ -82,32 +102,45 @@ def cross_correlate(shannon_values, fires):
     lag = np.arange(-len(shannon_array) + 1, len(fires_array))
     cross_corr = correlate(shannon_array, fires_array, mode='full', method='fft')
 
-    max_lag_index = np.argmax(np.abs(cross_corr))  # Index of max absolute value
-    best_lag = lag[max_lag_index]  # Corresponding lag
+    max_lag_index = np.argmax(np.abs(cross_corr))
+    best_lag = lag[max_lag_index]
     best_correlation = cross_corr[max_lag_index]
     print("best lag: ", best_lag)
     print("corresponding correlation value: ", best_correlation)
 
     # print(lags)
-    plt.plot(lag, cross_corr)
-    plt.xlabel('Lag (months)')
-    plt.ylabel('Cross-Correlation')
-    plt.title('Cross-Correlation Between Acres Burnt and Shannon Index')
-    plt.show()
-
-def test_cross_correlate():
-    db_path = "data/firedata.sqlite"
-    bird_path = "data/filtered_for_counties.txt"
-    fires = shannon_fires.extract_all_fires(db_path)
-    total_observations = count_total_bird_population_by_county('Orange')
-    weights = adjust_for_userbase('Orange')
-    weighted_observations = { date: count * weights.get(date.year, 1) for date, count in total_observations.items()}
-    smoothed_data = gaussian_filter1d(list(weighted_observations.values()), sigma=2)
-    smoothed_data_with_keys = dict(zip(weighted_observations.keys(), smoothed_data))
-    month_avgs = fit_shannon_to_months_avg(smoothed_data_with_keys)
-    decomposed_values = shannon_calculation.shannon_fourier_decomposed(month_avgs)
-    monthly_fires = fit_fires_to_months(fires['humboldt'])
-    cross_correlate(decomposed_values, monthly_fires)
+    if name != None:
+        plt.plot(lag, cross_corr)
+        plt.xlabel('Lag (months)')
+        plt.ylabel('Cross-Correlation')
+        plt.title('Cross-Correlation Between Acres Burnt and Shannon Index')
+        plt.savefig(f'{name}.png')
+    return best_lag, best_correlation
 
 
-# test_cross_correlate()
+def plot_lag_results(best_lags, best_correlations, name):
+    fig, axs = plt.subplots(1, 3, figsize=(18, 6))
+
+    # Histogram of best lags
+    sns.histplot(best_lags, bins=20, kde=True, ax=axs[0], color='blue')
+    axs[0].set_title('Best Lags', fontsize=14)
+    axs[0].set_xlabel('Lag', fontsize=12)
+    axs[0].set_ylabel('Frequency', fontsize=12)
+
+    # Histogram of best correlations
+    sns.histplot(best_correlations, bins=20, kde=True, ax=axs[1], color='green')
+    axs[1].set_title('Correlation Values', fontsize=14)
+    axs[1].set_xlabel('Correlation', fontsize=12)
+    axs[1].set_ylabel('Frequency', fontsize=12)
+
+    # Scatter plot of lags vs. correlations
+    sns.scatterplot(x=best_lags, y=best_correlations, ax=axs[2], color='purple')
+    axs[2].set_title('Lags vs. Correlations', fontsize=14)
+    axs[2].set_xlabel('Lag', fontsize=12)
+    axs[2].set_ylabel('Correlation', fontsize=12)
+    axs[2].grid(alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(f"{name}_lag_results.png")
+    plt.close(fig)
+
