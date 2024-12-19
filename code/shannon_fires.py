@@ -337,10 +337,10 @@ def process_and_plot_for_county(county_name, fire_data, filtered_bird_data):
 
 
 # Go through each county and plot them combine counties stored as FIPS CODE and plain text
-def plot_shannon_for_all_counties(fire_data, bird_data_path):
+def plot_shannon_for_all_counties(fire_path, bird_data_path):
+    fire_data = extract_all_fires(fire_path)
     for county_name in fire_data:
         print(f"Processing county: {county_name}...")
-
         is_county_code = county_name.isdigit()
 
         try:
@@ -433,12 +433,12 @@ def plot_shannon_test(dates, shannon_values, fires, county_name):
 
 db_path = "data/firedata.sqlite"
 bird_path = "data/filtered_for_counties.txt"
-fires = extract_all_fires(db_path)
+# fires = extract_all_fires(db_path)
 
 
 #Commented function tests.
 
-# plot_shannon_for_all_counties(fires, bird_path)
+plot_shannon_for_all_counties(db_path, bird_path)
 # sorted_county = sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
 # shannon_day_values = shannon_index_by_day_for_array(sorted_county)
 # decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_day_values)
