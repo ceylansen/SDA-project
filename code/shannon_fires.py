@@ -337,7 +337,7 @@ def process_and_plot_for_county(county_name, fire_data, filtered_bird_data):
                 filtered_bird_data, month, year
             )
     decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
-    # plot_shannon_test(dates, decomposed_values, fires, county_name)
+    plot_shannon_test(dates, decomposed_values, fires, county_name)
     lin_reg_counties(county_name, fire_data, decomposed_values)
     plot_full_shannon_county(county_name, decomposed_values)
 
@@ -441,6 +441,9 @@ def plot_shannon_test(dates, shannon_values, fires, county_name):
 db_path = "data/firedata.sqlite"
 bird_path = "data/filtered_for_counties.txt"
 fires = extract_all_fires(db_path)
+
+
+#Commented function tests.
 
 # plot_shannon_for_all_counties(fires, bird_path)
 # sorted_county = sort_county_by_date(bird_path, 'ebird_counties_datesorted.txt', 'Humboldt')
