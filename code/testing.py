@@ -11,7 +11,6 @@ def state_wide_sIndex_vs_fires(file_path, fire_path):
                 break
             shannon_values[dt.date(year, month, 15)] = shannon_calculation.shannon_index_by_month(file_path, month, year)
     sqlHandling.plot_shannon_fires(fires, shannon_values, 't1_regular_index_vs_fires')
-    return
 
 
 def state_wide_sIndex_decomposed_vs_fires(file_path, fire_path):
@@ -25,7 +24,6 @@ def state_wide_sIndex_decomposed_vs_fires(file_path, fire_path):
             shannon_values[dt.date(year, month, 15)] = shannon_calculation.shannon_index_by_month(file_path, month, year)
     decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
     sqlHandling.plot_shannon_fires(fires, decomposed_values, 't2_decomposed_index_vs_fires')
-    return
 
 
 def county_level_sIndex_decomposed_vs_fires(file_path, fire_path):
@@ -40,9 +38,8 @@ def county_level_sIndex_decomposed_vs_fires(file_path, fire_path):
                 shannon_values[dt.date(year, month, 15)] = shannon_calculation.shannon_index_by_month(file_path, month, year)
         decomposed_values = shannon_calculation.shannon_fourier_decomposed(shannon_values)
         sqlHandling.plot_shannon_fires(fires, decomposed_values, f't3_{county}')
-    return
 
-
+#idk wat hier wordt geplot linreg per county gebeurt al in shannon_fires.py
 def linear_regression_county_shannon(file_path, fire_path):
     print("Start test 4: Apply linear regression to each counties decomposed shannon index and fires...")
     r_values = []
@@ -60,12 +57,11 @@ def linear_regression_county_shannon(file_path, fire_path):
         r_values.append(r)
         p_values.append(p_value)
         r2_values.append(r2)
-    return
 
 
-def plot_5_biggest_fires_per_county():
-    # ceylan
-    pass
+def plot_5_biggest_fires_per_county(bird_path, fire_path):
+    print("Plotting 5 biggest fires, linear regression and shannon values per county ")
+    shannon_fires.plot_shannon_for_all_counties(bird_path, fire_path)
 
 
 def population_numbers_county():
