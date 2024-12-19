@@ -13,3 +13,12 @@ regression_per_county_plots: Plots of the linear regression between the shannon 
 California_plots: Contains a mix of all of the above with some added self-explanatory plots contained in the same folder for the whole state
 
 
+# To test the code run testing.py to run all implemented functionality. The tests are using a small sample of our very large original dataset
+
+
+Libraries used one might not already have:
+sqlite3
+statsmodels
+csv
+scipy
+sklearn

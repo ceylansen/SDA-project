@@ -202,7 +202,6 @@ def sort_county_by_date(input_file, county):
                 entries.append(row)
 
         print("sorting...")
-        # Read and sort rows by the date column
         sorted_rows = sorted(
             entries,
             key=lambda row: dt.datetime.strptime(row['OBSERVATION DATE'], '%Y-%m-%d')
@@ -221,28 +220,22 @@ def shannon_index_by_day_for_array(data):
         next_date = dt.date(int(y), int(m), int(d))
 
         if current_date is None:
-            # First date in the file
             current_date = next_date
 
         if next_date > current_date:
-            # Calculate Shannon index for the previous day
             shannon_index = shannon_calculation.calc_shannon(species_counts)
             shannon_values[current_date] = shannon_index
 
-            # Transition to the next day
             current_date = next_date
             species_counts.clear()
 
-        # Add species for the current row
         common_name = row["COMMON NAME"].strip()
         species_counts[common_name] += 1
 
-    # Handle the final day's data
     if species_counts:
         shannon_index = shannon_calculation.calc_shannon(species_counts)
         shannon_values[current_date] = shannon_index
 
-    # print(shannon_values)
     return shannon_values
 
 
@@ -315,7 +308,7 @@ def plot_full_shannon_county(county_name, decomposed_values):
     plt.legend(fontsize=10)
 
     plt.tight_layout()
-    plt.savefig(f"Shannon_values_{county_name}.png")
+    plt.savefig(f"plots/Shannon_values_{county_name}.png")
     plt.close()
 
 
@@ -435,7 +428,7 @@ def plot_shannon_test(dates, shannon_values, fires, county_name):
     axs[5].legend()
 
     plt.tight_layout()
-    plt.savefig(f"shannon_{county_name}.png")
+    plt.savefig(f"plots/shannon_{county_name}.png")
     plt.close(fig)
 
 db_path = "data/firedata.sqlite"
